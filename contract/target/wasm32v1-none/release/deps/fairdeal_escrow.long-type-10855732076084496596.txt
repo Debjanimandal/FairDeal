@@ -1,0 +1,2 @@
+core::result::Result<u64, _>
+TryFromVal<Env, soroban_sdk::Val>

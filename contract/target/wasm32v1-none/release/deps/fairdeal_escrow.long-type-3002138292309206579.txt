@@ -1,0 +1,3 @@
+(u32,): soroban_env_common::env::Env
+soroban_env_guest::guest::Guest
+soroban_env_common::env::Env
