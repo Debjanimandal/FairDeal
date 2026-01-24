@@ -30,6 +30,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
       if (response.data.success) {
         setJob(response.data.job);
         console.log("Loaded job:", response.data.job);
+        console.log("Job State:", response.data.job.state, typeof response.data.job.state);
       } else {
         setError("Job not found");
         setJob(null);
@@ -77,7 +78,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   const handleApprove = async () => {
     setApproving(true);
     try {
-      const response = await axios.post(`/api/jobs/${jobId}/approve`);
+      const response = await axios.post(`http://localhost:5000/api/jobs/${jobId}/approve`);
 
       alert(`Job approved! Original file CID: ${response.data.originalCID}`);
       alert(`Decryption Key: ${response.data.decryptionKey}`);
@@ -95,7 +96,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
     if (window.confirm("Are you sure you want to reject this job?")) {
       setRejecting(true);
       try {
-        await axios.post(`/api/jobs/${jobId}/reject`);
+        await axios.post(`http://localhost:5000/api/jobs/${jobId}/reject`);
         alert("Job rejected. The original file will not be revealed.");
         loadJobDetails();
       } catch (err: any) {
@@ -128,6 +129,10 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
   const isClient = wallet === job.client || userRole === "client";
   const isFreelancer = wallet === job.freelancer || userRole === "freelancer";
+
+  // Effective state: If we have preview data (jobStatus), treat state as 1 (Submitted) 
+  // unless it's already higher (Approved/Rejected)
+  const effectiveState = (job.state === 0 && jobStatus) ? 1 : job.state;
 
   return (
     <div>
@@ -277,19 +282,22 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
             </div>
 
             <div style={{ display: "flex", gap: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border)" }}>
+              {/* Debug info - remove later */}
+              <div style={{ display: 'none' }}>state: {job.state}, effective: {effectiveState}</div>
+
               <button
                 className="btn btn-success"
                 onClick={handleApprove}
-                disabled={approving || job.state !== 1}
-                style={{ flex: 1 }}
+                disabled={approving || effectiveState !== 1}
+                style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
               >
                 {approving ? "Releasing Funds..." : "✅ Approve & Release Funds"}
               </button>
               <button
                 className="btn btn-danger"
                 onClick={handleReject}
-                disabled={rejecting || job.state !== 1}
-                style={{ flex: 1 }}
+                disabled={rejecting || effectiveState !== 1}
+                style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
               >
                 {rejecting ? "Refunding..." : "❌ Reject & Refund Client"}
               </button>
@@ -300,7 +308,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       {/* Submit Work (for Freelancer) */}
       {
-        isFreelancer && job.state === 0 && (
+        isFreelancer && effectiveState === 0 && (
           <div className="glass-card" style={{ marginTop: "2rem", textAlign: "center", padding: "3rem" }}>
             <h3 style={{ marginBottom: "1rem" }}>Ready to submit?</h3>
             <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
@@ -319,7 +327,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       {/* Work Submitted (for Freelancer) */}
       {
-        isFreelancer && job.state === 1 && (
+        isFreelancer && effectiveState === 1 && (
           <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--warning)", background: "rgba(251, 191, 36, 0.05)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ fontSize: "2rem" }}>⏳</div>
@@ -336,7 +344,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       {/* Approved */}
       {
-        job.state === 2 && (
+        effectiveState === 2 && (
           <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--success)", background: "rgba(74, 222, 128, 0.05)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ fontSize: "2rem" }}>✅</div>
@@ -353,7 +361,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       {/* Rejected */}
       {
-        job.state === 3 && (
+        effectiveState === 3 && (
           <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--error)", background: "rgba(248, 113, 113, 0.05)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ fontSize: "2rem" }}>❌</div>

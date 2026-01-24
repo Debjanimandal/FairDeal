@@ -79,13 +79,42 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
 
       console.log("✅ Initial payment successful! Transaction hash:", transactionHash);
       console.log(`💰 Sent ${initialPayment} (${initialPaymentPercent}%) to freelancer`);
-      console.log(`🔒 Remaining ${remainingAmount} (${100 - initialPaymentPercent}%) locked in escrow`);
 
+      // **Fetch escrow address and send remaining amount**
       setSuccess(
         `✅ Initial payment sent!\n` +
         `💰 ${initialPayment.toFixed(2)} (${initialPaymentPercent}%) sent to freelancer\n` +
+        `⏳ Sending remaining ${remainingAmount.toFixed(2)} (${100 - initialPaymentPercent}%) to escrow...`
+      );
+
+      // Get escrow address from backend
+      const escrowResponse = await axios.get("http://localhost:5000/api/escrow-address");
+      if (!escrowResponse.data.success || !escrowResponse.data.escrowAddress) {
+        throw new Error("Failed to fetch escrow address");
+      }
+      const escrowAddress = escrowResponse.data.escrowAddress;
+      console.log("📍 Escrow address:", escrowAddress);
+
+      // Send remaining amount to escrow
+      const formattedRemainingAmount = remainingAmount.toFixed(7);
+      console.log(`🔒 Sending ${formattedRemainingAmount} XLM (${100 - initialPaymentPercent}%) to escrow`);
+
+      const escrowTransactionHash = await executePayment(
+        wallet, // From (client wallet)
+        escrowAddress, // To (escrow wallet)
+        formattedRemainingAmount, // Remaining amount
+        `FairDeal Escrow ${100 - initialPaymentPercent}%` // Memo
+      );
+
+      console.log("✅ Escrow payment successful! Transaction hash:", escrowTransactionHash);
+      console.log(`🔒 Locked ${remainingAmount} (${100 - initialPaymentPercent}%) in escrow`);
+
+      setSuccess(
+        `✅ Payments complete!\n` +
+        `💰 ${initialPayment.toFixed(2)} (${initialPaymentPercent}%) sent to freelancer\n` +
         `🔒 ${remainingAmount.toFixed(2)} (${100 - initialPaymentPercent}%) locked in escrow\n` +
-        `🔗 Transaction: ${transactionHash.substring(0, 16)}...\n\n` +
+        `🔗 Initial TX: ${transactionHash.substring(0, 16)}...\n` +
+        `🔗 Escrow TX: ${escrowTransactionHash.substring(0, 16)}...\n\n` +
         `⏳ Creating job and saving to IPFS...`
       );
 
@@ -93,14 +122,15 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
       const deadlineDate = new Date();
       deadlineDate.setDate(deadlineDate.getDate() + parseInt(formData.deadlineDays));
 
-      // Create job on backend (now includes transaction hash and initial payment percent)
+      // Create job on backend (now includes BOTH transaction hashes)
       const response = await axios.post("http://localhost:5000/api/jobs", {
         client: wallet,
         freelancer: formData.freelancerAddress,
         amount: formData.amount,
         deadline: deadlineDate.toISOString(),
         description: formData.description,
-        transactionHash: transactionHash, // Transaction hash for initial payment
+        transactionHash: transactionHash, // Transaction hash for initial payment to freelancer
+        escrowTransactionHash: escrowTransactionHash, // Transaction hash for escrow payment
         initialPaymentPercent: initialPaymentPercent, // Include initial payment %
         initialPaymentReleased: true, // Mark as released since we just sent it
       });

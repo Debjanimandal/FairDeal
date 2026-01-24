@@ -7,6 +7,7 @@ const Jimp = require("jimp");
 const pinataSDK = require("@pinata/sdk");
 const fs = require("fs");
 const path = require("path");
+const StellarSdk = require("@stellar/stellar-sdk");
 
 const app = express();
 
@@ -29,6 +30,113 @@ let latestJobsIPFSCID = null; // Track the latest CID for jobs database
 const pinataApiKey = process.env.PINATA_API_KEY;
 const pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY;
 const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
+
+// Initialize Stellar
+const stellarServer = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+
+/**
+ * Release funds from escrow to freelancer
+ */
+async function releaseFundsToFreelancer(jobId) {
+  try {
+    const job = jobStorage.get(jobId);
+    if (!job) throw new Error("Job not found");
+
+    // Calculate remaining amount (total - initial payment already sent)
+    const totalAmount = parseFloat(job.amount);
+    const initialPaymentPercent = job.initialPaymentPercent || 10;
+    const initialPayment = (totalAmount * initialPaymentPercent) / 100;
+    const remainingAmount = (totalAmount - initialPayment).toFixed(7);
+
+    console.log(`💰 Releasing ${remainingAmount} XLM from escrow to freelancer`);
+
+    // Load escrow keypair
+    const escrowKeypair = StellarSdk.Keypair.fromSecret(process.env.ESCROW_SECRET_KEY);
+
+    // Load escrow account
+    const escrowAccount = await stellarServer.loadAccount(escrowKeypair.publicKey());
+
+    // Build payment transaction
+    const transaction = new StellarSdk.TransactionBuilder(escrowAccount, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+      .addOperation(
+        StellarSdk.Operation.payment({
+          destination: job.freelancer,
+          asset: StellarSdk.Asset.native(),
+          amount: remainingAmount,
+        })
+      )
+      .addMemo(StellarSdk.Memo.text("FairDeal Release"))
+      .setTimeout(180)
+      .build();
+
+    // Sign with escrow key
+    transaction.sign(escrowKeypair);
+
+    // Submit to network
+    const result = await stellarServer.submitTransaction(transaction);
+    console.log("✅ Funds released! Transaction:", result.hash);
+
+    return result.hash;
+  } catch (error) {
+    console.error("Error releasing funds:", error);
+    throw error;
+  }
+}
+
+/**
+ * Refund remaining funds from escrow to client
+ */
+async function refundFundsToClient(jobId) {
+  try {
+    const job = jobStorage.get(jobId);
+    if (!job) throw new Error("Job not found");
+
+    // Calculate remaining amount (total - initial payment already sent)
+    const totalAmount = parseFloat(job.amount);
+    const initialPaymentPercent = job.initialPaymentPercent || 10;
+    const initialPayment = (totalAmount * initialPaymentPercent) / 100;
+    const remainingAmount = (totalAmount - initialPayment).toFixed(7);
+
+    console.log(`💸 Refunding ${remainingAmount} XLM from escrow to client`);
+
+    // Load escrow keypair
+    const escrowKeypair = StellarSdk.Keypair.fromSecret(process.env.ESCROW_SECRET_KEY);
+
+    // Load escrow account
+    const escrowAccount = await stellarServer.loadAccount(escrowKeypair.publicKey());
+
+    // Build payment transaction
+    const transaction = new StellarSdk.TransactionBuilder(escrowAccount, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+      .addOperation(
+        StellarSdk.Operation.payment({
+          destination: job.client,
+          asset: StellarSdk.Asset.native(),
+          amount: remainingAmount,
+        })
+      )
+      .addMemo(StellarSdk.Memo.text("FairDeal Refund"))
+      .setTimeout(180)
+      .build();
+
+    // Sign with escrow key
+    transaction.sign(escrowKeypair);
+
+    // Submit to network
+    const result = await stellarServer.submitTransaction(transaction);
+    console.log("✅ Refund complete! Transaction:", result.hash);
+
+    return result.hash;
+  } catch (error) {
+    console.error("Error refunding:", error);
+    throw error;
+  }
+}
 
 /**
  * Encryption utilities
@@ -288,6 +396,22 @@ app.post("/api/jobs", (req, res) => {
 });
 
 /**
+ * GET /api/escrow-address
+ * Get the escrow wallet public address
+ */
+app.get("/api/escrow-address", (req, res) => {
+  try {
+    res.json({
+      success: true,
+      escrowAddress: process.env.ESCROW_PUBLIC_KEY,
+    });
+  } catch (error) {
+    console.error("Error getting escrow address:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/jobs
  * List all jobs
  */
@@ -370,6 +494,16 @@ app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
       fileSize: file.size,
     });
 
+    // Update job state in main storage
+    const job = jobStorage.get(jobId);
+    if (job) {
+      job.state = 1; // Submitted
+      jobStorage.set(jobId, job);
+      console.log(`✅ Job ${jobId} state updated to 1 (Submitted)`);
+    } else {
+      console.warn(`⚠️ Job ${jobId} not found in storage during submission`);
+    }
+
     res.json({
       success: true,
       jobId,
@@ -415,32 +549,48 @@ app.get("/api/jobs/:jobId/preview", (req, res) => {
  * Approve job and reveal original file details
  * Can only be called after smart contract approves
  */
-app.post("/api/jobs/:jobId/approve", (req, res) => {
+app.post("/api/jobs/:jobId/approve", async (req, res) => {
   try {
     const { jobId } = req.params;
+    const job = jobStorage.get(jobId);
     const jobData = jobFiles.get(jobId);
 
-    if (!jobData) {
+    if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // Reveal the original file CID and decryption key
-    const response = {
+    if (job.state !== 1) {
+      return res.status(400).json({ error: "Job must be in submitted state" });
+    }
+
+    // Release remaining funds from escrow to freelancer
+    const releaseTransactionHash = await releaseFundsToFreelancer(jobId);
+
+    // Update job state
+    job.state = 2; // Approved
+    job.releaseTransactionHash = releaseTransactionHash;
+    job.approvedAt = new Date().toISOString();
+    jobStorage.set(jobId, job);
+
+    // Also mark file data as approved if exists
+    if (jobData) {
+      jobData.approved = true;
+      jobData.approvedAt = new Date().toISOString();
+      jobFiles.set(jobId, jobData);
+    }
+
+    console.log(`✅ Job ${jobId} approved! Funds released to freelancer`);
+
+    res.json({
+      success: true,
+      message: "Job approved and funds released to freelancer",
       jobId,
-      originalCID: jobData.originalCID,
-      originalURL: `https://gateway.pinata.cloud/ipfs/${jobData.originalCID}`,
-      decryptionKey: jobData.encryptionKey,
-      decryptionIV: jobData.encryptionIV,
-      fileName: jobData.fileName,
-      message: "Job approved! Use the decryption key to decrypt the original file.",
-      decryptionInstructions: "Use AES-256-CBC with the provided key and IV",
-    };
-
-    // Mark as approved in storage
-    jobData.approved = true;
-    jobData.approvedAt = new Date().toISOString();
-
-    res.json(response);
+      releaseTransactionHash,
+      originalCID: jobData?.originalCID,
+      originalURL: jobData ? `https://gateway.pinata.cloud/ipfs/${jobData.originalCID}` : null,
+      decryptionKey: jobData?.encryptionKey,
+      decryptionIV: jobData?.encryptionIV,
+    });
   } catch (error) {
     console.error("Error approving job:", error);
     res.status(500).json({ error: error.message });
@@ -449,24 +599,45 @@ app.post("/api/jobs/:jobId/approve", (req, res) => {
 
 /**
  * POST /api/jobs/:jobId/reject
- * Reject job (original file is never revealed)
+ * Reject job and refund funds to client
  */
-app.post("/api/jobs/:jobId/reject", (req, res) => {
+app.post("/api/jobs/:jobId/reject", async (req, res) => {
   try {
     const { jobId } = req.params;
+    const job = jobStorage.get(jobId);
     const jobData = jobFiles.get(jobId);
 
-    if (!jobData) {
+    if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // Mark as rejected and delete the original file data
-    jobData.rejected = true;
-    jobData.rejectedAt = new Date().toISOString();
+    if (job.state !== 1) {
+      return res.status(400).json({ error: "Job must be in submitted state" });
+    }
+
+    // Refund remaining funds from escrow to client
+    const refundTransactionHash = await refundFundsToClient(jobId);
+
+    // Update job state
+    job.state = 3; // Rejected
+    job.refundTransactionHash = refundTransactionHash;
+    job.rejectedAt = new Date().toISOString();
+    jobStorage.set(jobId, job);
+
+    // Mark file data as rejected if exists
+    if (jobData) {
+      jobData.rejected = true;
+      jobData.rejectedAt = new Date().toISOString();
+      jobFiles.set(jobId, jobData);
+    }
+
+    console.log(`❌ Job ${jobId} rejected! Funds refunded to client`);
 
     res.json({
+      success: true,
+      message: "Job rejected and funds refunded to client",
       jobId,
-      message: "Job rejected. Original file will not be revealed.",
+      refundTransactionHash,
     });
   } catch (error) {
     console.error("Error rejecting job:", error);

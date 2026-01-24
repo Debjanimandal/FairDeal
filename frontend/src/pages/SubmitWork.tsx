@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -9,6 +9,7 @@ interface SubmitWorkProps {
 const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -30,19 +31,19 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.add("active");
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove("active");
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove("active");
@@ -71,7 +72,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
       formData.append("freelancerAddress", wallet || "");
       formData.append("file", file);
 
-      const response = await axios.post("/api/jobs/submit-work", formData, {
+      const response = await axios.post("http://localhost:5000/api/jobs/submit-work", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -119,65 +120,54 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
             <div className="form-group">
               <label>Select File to Upload *</label>
 
-              <div
-                className="file-upload-area"
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById("file-input")?.click()}
-              >
-                <div className="file-icon">📁</div>
-                <p style={{ fontWeight: "bold", color: "var(--primary)", fontSize: "1.1rem" }}>
-                  {file
-                    ? `Selected: ${file.name}`
-                    : "Drag and drop your file here or click to browse"}
-                </p>
-                <small style={{ color: "var(--text-muted)" }}>
-                  Supported: Images, PDFs, Documents, Code, Archives (Max 50MB)
-                </small>
-                <input
-                  id="file-input"
-                  type="file"
-                  onChange={handleFileChange}
-                  style={{ display: "none" }}
-                />
-              </div>
-            </div>
-
-            {file && (
-              <div
+              {/* Standard visible file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileChange}
+                className="form-input"
                 style={{
-                  padding: "1rem",
-                  background: "rgba(15, 23, 42, 0.4)",
-                  borderRadius: "8px",
-                  marginBottom: "1.5rem",
-                  border: "1px solid var(--border)"
+                  padding: "0.75rem",
+                  cursor: "pointer",
+                  fontSize: "1rem"
                 }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                  <span style={{ color: "var(--text-muted)" }}>File Name:</span>
-                  <strong>{file.name}</strong>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                  <span style={{ color: "var(--text-muted)" }}>Size:</span>
-                  <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--text-muted)" }}>Type:</span>
-                  <span>{file.type || "Unknown"}</span>
-                </div>
-              </div>
-            )}
+              />
 
-            <div className="message-alert alert-info">
-              <div>
-                <strong>🔐 Security & Privacy Process:</strong>
-                <ol style={{ marginTop: "0.5rem", marginLeft: "1.5rem", lineHeight: "1.6" }}>
-                  <li>Original file will be encrypted locally with AES-256</li>
-                  <li>A separate watermarked preview will be generated</li>
-                  <li>Both versions are pinned to IPFS for permanence</li>
-                  <li>Client only sees the preview until they approve payment</li>
-                </ol>
+              {file && (
+                <div
+                  style={{
+                    padding: "1rem",
+                    background: "rgba(15, 23, 42, 0.4)",
+                    borderRadius: "8px",
+                    marginTop: "1rem",
+                    border: "1px solid var(--border)"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>File Name:</span>
+                    <strong>{file.name}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span style={{ color: "var(--text-muted)" }}>Size:</span>
+                    <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "var(--text-muted)" }}>Type:</span>
+                    <span>{file.type || "Unknown"}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="message-alert alert-info">
+                <div>
+                  <strong>🔐 Security & Privacy Process:</strong>
+                  <ol style={{ marginTop: "0.5rem", marginLeft: "1.5rem", lineHeight: "1.6" }}>
+                    <li>Original file will be encrypted locally with AES-256</li>
+                    <li>A separate watermarked preview will be generated</li>
+                    <li>Both versions are pinned to IPFS for permanence</li>
+                    <li>Client only sees the preview until they approve payment</li>
+                  </ol>
+                </div>
               </div>
             </div>
 
