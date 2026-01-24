@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Clean Light Theme - Restored */
+  --bg-main: #ffffff;
+  --bg-alt: #f8fafc;
+  /* Slate 50 */
+  --bg-card: #ffffff;
+
+  --primary: #2563eb;
+  /* Royal Blue */
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+
+  --secondary: #f1f5f9;
+  /* Slate 100 */
+  --secondary-hover: #e2e8f0;
+
+  --text-main: #0f172a;
+  /* Slate 900 */
+  --text-muted: #64748b;
+  /* Slate 500 */
+
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  --border: #e2e8f0;
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  --font-main: 'Inter', sans-serif;
+  --radius: 16px;
+  /* Larger radius for the new soft look */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  position: absolute;
+  /* Floating navbar for this design */
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  padding: 1.5rem 0;
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-logo::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.wallet-badge {
+  background: var(--secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.role-badge {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  width: 100%;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.6rem;
+  border-radius: 99px;
+  /* Pill shapes */
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--secondary);
+}
+
+/* Cards */
+.glass-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--secondary);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-float);
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 2rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: #f1f5f9;
+  /* Soft grey input bg */
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* Grid */
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2.5rem;
+}
+
+/* Dashboard Specifics */
+.job-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.job-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 1rem 0;
+  color: var(--text-main);
+}
+
+.status-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-created {
+  background: #eff6ff;
+  color: var(--primary);
+}
+
+.status-submitted {
+  background: #fffbeb;
+  color: var(--warning);
+}
+
+.status-approved {
+  background: #ecfdf5;
+  color: var(--success);
+}
+
+/* Wallet Connect Clean Layout */
+.wallet-page-container {
+  display: flex;
+  min-height: 100vh;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-selector {
+  display: flex;
+  gap: 1rem;
+}
