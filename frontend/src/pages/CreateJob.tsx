@@ -62,7 +62,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
       const initialPayment = Math.round((totalAmount * initialPaymentPercent) * 10000000) / 10000000 / 100;
       const remainingAmount = Math.round((totalAmount - initialPayment) * 10000000) / 10000000;
 
-      setSuccess(`💳 Building payment transaction...\n📊 Splitting: ${initialPaymentPercent}% now, ${100 - initialPaymentPercent}% on approval`);
+      setSuccess(`Building payment transaction...\nSplitting: ${initialPaymentPercent}% now, ${100 - initialPaymentPercent}% on approval`);
 
       // **Send ONLY initial percentage to freelancer**
       // Format amount to max 7 decimal places (Stellar requirement)
@@ -82,9 +82,9 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
 
       // **Fetch escrow address and send remaining amount**
       setSuccess(
-        `✅ Initial payment sent!\n` +
-        `💰 ${initialPayment.toFixed(2)} (${initialPaymentPercent}%) sent to freelancer\n` +
-        `⏳ Sending remaining ${remainingAmount.toFixed(2)} (${100 - initialPaymentPercent}%) to escrow...`
+        `Initial payment sent!\n` +
+        `• ${initialPayment.toFixed(2)} XLM (${initialPaymentPercent}%) sent to freelancer\n` +
+        `• Sending remaining ${remainingAmount.toFixed(2)} (%${100 - initialPaymentPercent}) to escrow...`
       );
 
       // Get escrow address from backend
@@ -110,12 +110,12 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
       console.log(`🔒 Locked ${remainingAmount} (${100 - initialPaymentPercent}%) in escrow`);
 
       setSuccess(
-        `✅ Payments complete!\n` +
-        `💰 ${initialPayment.toFixed(2)} (${initialPaymentPercent}%) sent to freelancer\n` +
-        `🔒 ${remainingAmount.toFixed(2)} (${100 - initialPaymentPercent}%) locked in escrow\n` +
-        `🔗 Initial TX: ${transactionHash.substring(0, 16)}...\n` +
-        `🔗 Escrow TX: ${escrowTransactionHash.substring(0, 16)}...\n\n` +
-        `⏳ Creating job and saving to IPFS...`
+        `Payments complete!\n` +
+        `• ${initialPayment.toFixed(2)} XLM (${initialPaymentPercent}%) sent to freelancer\n` +
+        `• ${remainingAmount.toFixed(2)} XLM (${100 - initialPaymentPercent}%) locked in escrow\n` +
+        `• Initial TX: ${transactionHash.substring(0, 16)}...\n` +
+        `• Escrow TX: ${escrowTransactionHash.substring(0, 16)}...\n\n` +
+        `Creating job and saving to IPFS...`
       );
 
       // Calculate deadline
@@ -140,15 +140,15 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
         const ipfsCID = response.data.ipfsCID;
 
         setSuccess(
-          `✅ Job created successfully!\n\n` +
-          `🔐 Job ID: ${jobId}\n` +
-          `💰 Total Amount: ${formData.amount} XLM\n` +
-          `  ✓ Initial: ${initialPayment.toFixed(2)} XLM (${initialPaymentPercent}%) - SENT\n` +
-          `  🔒 Remaining: ${remainingAmount.toFixed(2)} XLM (${100 - initialPaymentPercent}%) - IN ESCROW\n` +
-          `👤 Freelancer: ${formData.freelancerAddress.substring(0, 12)}...\n` +
-          `📅 Deadline: ${formData.deadlineDays} days\n` +
-          `📦 Saved to IPFS: ${ipfsCID ? ipfsCID.substring(0, 12) + '...' : 'Pending'}\n` +
-          `🔗 TX Hash: ${transactionHash.substring(0, 16)}...\n\n` +
+          `Job created successfully!\n\n` +
+          `Job ID: ${jobId}\n` +
+          `Total Amount: ${formData.amount} XLM\n` +
+          `  • Initial: ${initialPayment.toFixed(2)} XLM (${initialPaymentPercent}%) - SENT\n` +
+          `  • Remaining: ${remainingAmount.toFixed(2)} XLM (${100 - initialPaymentPercent}%) - IN ESCROW\n` +
+          `Freelancer: ${formData.freelancerAddress.substring(0, 12)}...\n` +
+          `Deadline: ${formData.deadlineDays} days\n` +
+          `Saved to IPFS: ${ipfsCID ? ipfsCID.substring(0, 12) + '...' : 'Pending'}\n` +
+          `TX Hash: ${transactionHash.substring(0, 16)}...\n\n` +
           `Redirecting to dashboard...`
         );
 
@@ -183,18 +183,18 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
   };
 
   return (
-    <div>
-      <div className="page-header">
+    <div style={{ paddingTop: "8rem", paddingBottom: "4rem", paddingLeft: "2rem", paddingRight: "2rem", minHeight: "100vh" }}>
+      <div className="page-header" style={{ maxWidth: "800px", margin: "0 auto 2rem auto" }}>
         <div className="page-title">
           <h1>Create New Job</h1>
           <p>Set up an escrow contract for your freelancer.</p>
         </div>
       </div>
 
-      <div className="glass-card" style={{ maxWidth: "800px", margin: "0 auto" }}>
+      <div className="glass-card animate-fade-in" style={{ maxWidth: "800px", margin: "0 auto" }}>
 
-        {error && <div className="message-alert alert-error">⚠️ {error}</div>}
-        {success && <div className="message-alert alert-success">✅ {success}</div>}
+        {error && <div className="message-alert alert-error">{error}</div>}
+        {success && <div className="message-alert alert-success">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="grid-cols-2" style={{ display: "grid", gap: "2rem", marginBottom: "1.5rem" }}>

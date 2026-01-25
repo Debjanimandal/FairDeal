@@ -97,8 +97,8 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
   };
 
   return (
-    <div>
-      <div className="page-header">
+    <div style={{ paddingTop: "8rem", paddingBottom: "4rem", paddingLeft: "2rem", paddingRight: "2rem", minHeight: "100vh" }}>
+      <div className="page-header" style={{ maxWidth: "800px", margin: "0 auto 2rem auto" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <button
             className="btn btn-secondary"
@@ -114,10 +114,10 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ maxWidth: "800px", margin: "0 auto" }}>
+      <div className="glass-card animate-fade-in" style={{ maxWidth: "800px", margin: "0 auto" }}>
 
-        {error && <div className="message-alert alert-error">⚠️ {error}</div>}
-        {success && <div className="message-alert alert-success">✅ {success}</div>}
+        {error && <div className="message-alert alert-error">{error}</div>}
+        {success && <div className="message-alert alert-success">{success}</div>}
 
         {!submissionData ? (
           <form onSubmit={handleSubmit}>
@@ -168,7 +168,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
 
               <div className="message-alert alert-info">
                 <div>
-                  <strong>🔐 Security & Privacy Process:</strong>
+                  <strong>Security & Privacy Process:</strong>
                   <ol style={{ marginTop: "0.5rem", marginLeft: "1.5rem", lineHeight: "1.6" }}>
                     <li>Code folder will be compressed into ZIP and encrypted with AES-256</li>
                     <li>A code execution preview will be generated for client review</li>
@@ -187,7 +187,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
                 disabled={files.length === 0 || loading}
                 style={{ flex: 2, padding: "1rem" }}
               >
-                {loading ? "Uploading & Processing..." : `✅ Submit ${files.length > 0 ? files.length + ' File(s)' : 'Work'} Securely`}
+                {loading ? "Uploading & Processing..." : `Submit ${files.length > 0 ? files.length + ' File(s)' : 'Work'} Securely`}
               </button>
 
               <button
@@ -202,7 +202,9 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
           </form>
         ) : (
           <div style={{ textAlign: "center", padding: "2rem 0" }}>
-            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🎉</div>
+            <div style={{ color: "var(--success)", display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
             <h3 style={{ fontSize: "1.8rem", color: "var(--success)", marginBottom: "1rem" }}>Work Submitted Successfully!</h3>
 
             <div style={{ background: "rgba(15, 23, 42, 0.4)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--border)", textAlign: "left", marginBottom: "2rem" }}>

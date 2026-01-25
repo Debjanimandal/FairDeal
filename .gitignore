@@ -1,0 +1,95 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.local
+
+# Build outputs
+dist/
+build/
+*.tgz
+
+# Frontend
+frontend/build/
+frontend/dist/
+frontend/.eslintcache
+
+# Backend
+backend/temp_execution/
+backend/uploads/
+backend/*.log
+
+# Rust/Cargo
+contract/target/
+**/*.rs.bk
+Cargo.lock
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.settings/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+lib-cov/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# HTML Documentation
+README.html
+
+# Build artifacts
+*.wasm
+!contract/target/wasm32-unknown-unknown/release/*.wasm
+
+# Deployment artifacts
+.stellar/
+*.deployed
+
+# IPFS
+.ipfs/
+
+# Mac
+*.dmg

@@ -50,141 +50,153 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect }) => {
   };
 
   return (
-    <div className="wallet-page-container" style={{ display: "flex", width: "100%", height: "100vh", background: "white", overflow: "hidden" }}>
+    <div className="wallet-page-container" style={{
+      display: "flex",
+      width: "100%",
+      height: "100vh",
+      position: 'relative',
+      overflow: "hidden",
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
 
-      {/* Left Panel - Content */}
-      <div style={{
-        flex: "1.2",
-        padding: "6rem 6rem",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        zIndex: 10
+      {/* Background Ambience */}
+      <div className="bg-blob blob-1" style={{ width: '800px', height: '800px', top: '-400px', left: '-200px', opacity: 0.3 }}></div>
+      <div className="bg-blob blob-2" style={{ width: '600px', height: '600px', bottom: '-200px', right: '-200px', opacity: 0.3 }}></div>
+
+
+      <div className="glass-card animate-fade-in" style={{
+        maxWidth: "500px",
+        width: "100%",
+        padding: "3rem 2.5rem",
+        borderRadius: "24px",
+        textAlign: 'center',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        background: 'rgba(15, 23, 42, 0.6)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
       }}>
-        <div style={{ maxWidth: "550px" }}>
-          <h4 style={{
-            fontSize: "0.85rem",
-            fontWeight: "700",
-            color: "#94a3b8",
-            textTransform: "uppercase",
-            letterSpacing: "0.15em",
-            marginBottom: "1.5rem"
-          }}>
-            Start for free
-          </h4>
 
-          <h1 style={{
-            fontSize: "4rem",
-            fontWeight: "800",
-            color: "#0f172a",
-            marginBottom: "0.5rem",
-            lineHeight: "1.1",
-            letterSpacing: "-0.02em"
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '60px',
+            height: '60px',
+            borderRadius: '20px',
+            background: 'var(--gradient-primary)',
+            marginBottom: '1.5rem',
+            boxShadow: '0 0 20px rgba(0, 114, 255, 0.4)'
           }}>
-            Connect Wallet<span style={{ color: "var(--primary)" }}>.</span>
+            {/* Diamond/Logo Icon */}
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 9a3 3 0 0 1 0 0L12 2l10 7a3 3 0 0 1 0 0v9a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9z"></path>
+              <path d="M12 22V12"></path>
+              <path d="M12 12L2 9"></path>
+              <path d="M12 12l10-3"></path>
+            </svg>
+          </div>
+
+          <h1 className="hero-title" style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
+            Welcome Back
           </h1>
-
-          <p style={{
-            fontSize: "1.1rem",
-            color: "#64748b",
-            marginBottom: "3rem"
-          }}>
-            Already a member? <span style={{ color: "var(--primary)", fontWeight: "600", cursor: "pointer" }}>Log In</span>
+          <p style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
+            Connect your wallet to enter the secure workspace.
           </p>
+        </div>
 
-          <div style={{ marginBottom: "2.5rem" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: "700", marginBottom: "1rem", display: "block", color: "#334155", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              I am connecting as
-            </label>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-              <div
-                onClick={() => setSelectedRole("client")}
-                style={{
-                  padding: "1.5rem",
-                  background: selectedRole === "client" ? "#eff6ff" : "#f8fafc",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  border: selectedRole === "client" ? "2px solid var(--primary)" : "2px solid transparent",
-                  transition: "all 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: "700", fontSize: "1.1rem", marginBottom: "0.25rem" }}>Client</div>
-                  <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Hire Talent</div>
-                </div>
-                {selectedRole === "client" && <div style={{ color: "var(--primary)", fontSize: "1.2rem", lineHeight: 0 }}>●</div>}
-              </div>
+        <div style={{ marginBottom: "2.5rem" }}>
+          <label style={{
+            fontSize: "0.85rem",
+            fontWeight: "600",
+            marginBottom: "1rem",
+            display: "block",
+            color: "var(--text-muted)",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em"
+          }}>
+            I am connecting as
+          </label>
 
-              <div
-                onClick={() => setSelectedRole("freelancer")}
-                style={{
-                  padding: "1.5rem",
-                  background: selectedRole === "freelancer" ? "#eff6ff" : "#f8fafc",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  border: selectedRole === "freelancer" ? "2px solid var(--primary)" : "2px solid transparent",
-                  transition: "all 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: "700", fontSize: "1.1rem", marginBottom: "0.25rem" }}>Freelancer</div>
-                  <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Find Work</div>
-                </div>
-                {selectedRole === "freelancer" && <div style={{ color: "var(--primary)", fontSize: "1.2rem", lineHeight: 0 }}>●</div>}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div
+              onClick={() => setSelectedRole("client")}
+              className={selectedRole === "client" ? "role-card active" : "role-card"}
+              style={{
+                padding: "1.25rem",
+                background: selectedRole === "client" ? "rgba(0, 114, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                borderRadius: "16px",
+                cursor: "pointer",
+                border: selectedRole === "client" ? "1px solid #00C6FF" : "1px solid transparent",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ marginBottom: "0.5rem", color: selectedRole === "client" ? "#00C6FF" : "white" }}>
+                {/* Briefcase Icon */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
               </div>
+              <div style={{ fontWeight: "600", fontSize: "1rem", color: "var(--text-main)" }}>Client</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Hire Talent</div>
+            </div>
+
+            <div
+              onClick={() => setSelectedRole("freelancer")}
+              className={selectedRole === "freelancer" ? "role-card active" : "role-card"}
+              style={{
+                padding: "1.25rem",
+                background: selectedRole === "freelancer" ? "rgba(225, 0, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                borderRadius: "16px",
+                cursor: "pointer",
+                border: selectedRole === "freelancer" ? "1px solid #E100FF" : "1px solid transparent",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ marginBottom: "0.5rem", color: selectedRole === "freelancer" ? "#E100FF" : "white" }}>
+                {/* Code Icon */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+              </div>
+              <div style={{ fontWeight: "600", fontSize: "1rem", color: "var(--text-main)" }}>Freelancer</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Find Work</div>
             </div>
           </div>
-
-          <button
-            className="btn btn-primary"
-            onClick={connectWallet}
-            style={{
-              width: "100%",
-              padding: "1.25rem",
-              borderRadius: "99px",
-              fontSize: "1.1rem",
-              marginBottom: "2rem",
-              boxShadow: "0 10px 25px -5px rgba(37, 99, 235, 0.4)"
-            }}
-          >
-            Connect Account
-          </button>
-
-          <div style={{ display: "flex", gap: "1rem" }}>
-            <button style={{ flex: 1, padding: "1rem", borderRadius: "99px", border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontWeight: "600", cursor: "pointer" }}>Change Method</button>
-          </div>
         </div>
+
+        <button
+          className="btn btn-primary"
+          onClick={connectWallet}
+          style={{
+            width: "100%",
+            padding: "1rem",
+            borderRadius: "12px",
+            fontSize: "1.1rem",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem'
+          }}
+        >
+          {/* Wallet Icon */}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+            <path d="M4 6v12a2 2 0 0 0 2 2h14v-4"></path>
+            <path d="M18 12a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4v-8h-4z"></path>
+          </svg>
+          Connect Freighter Wallet
+        </button>
+
+        <p style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+          New to Stellar? <a href="https://www.freighter.app/" target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600' }}>Get Freighter</a>
+        </p>
+
       </div>
-
-      {/* Right Panel - Wavy Image */}
-      <div style={{
-        flex: "1",
-        position: "relative",
-        background: "url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        clipPath: "ellipse(170% 100% at 90% 50%)",
-        borderTopLeftRadius: "50px",
-        borderBottomLeftRadius: "150px",
-        transform: "translateX(-15px)"
-      }}>
-        <div style={{
-          position: "absolute",
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: "linear-gradient(to right, rgba(255,255,255,0.4), rgba(0,0,0,0.1))"
-        }}></div>
-
-        <div style={{ position: "absolute", bottom: "4rem", right: "4rem", color: "white", textAlign: "right", zIndex: 20 }}>
-          <h2 style={{ fontSize: "4rem", fontWeight: "800", textShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>FD.</h2>
-        </div>
-      </div>
-
     </div>
   );
 };

@@ -43,11 +43,18 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
+        <div className="bg-blob blob-1"></div>
+        <div className="bg-blob blob-2"></div>
         {/* Navbar */}
         <nav className="navbar">
           <div className="nav-container">
-            <Link to="/" className="nav-logo">
-              FairDeal
+            <Link to="/" className="nav-logo" style={{ textDecoration: 'none' }}>
+              <div className="logo-container">
+                <div className="logo-icon">
+                  <span className="logo-f">F</span>
+                </div>
+                <span className="text-gradient">FairDeal</span>
+              </div>
             </Link>
             <div className="nav-links">
               {wallet ? (
