@@ -466,6 +466,16 @@ app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Missing jobId or file" });
     }
 
+    const job = jobStorage.get(jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Allow submission only if Created (0) or Revision Requested (4)
+    if (job.state !== 0 && job.state !== 4) {
+      return res.status(400).json({ error: "Cannot submit work. Contract is not in a submittable state." });
+    }
+
     // Generate encryption key
     const encryptionKey = encryptionManager.generateKey();
 
@@ -495,7 +505,7 @@ app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
     });
 
     // Update job state in main storage
-    const job = jobStorage.get(jobId);
+    // Update job state in main storage (job already fetched above)
     if (job) {
       job.state = 1; // Submitted
       jobStorage.set(jobId, job);
@@ -604,6 +614,8 @@ app.post("/api/jobs/:jobId/approve", async (req, res) => {
 app.post("/api/jobs/:jobId/reject", async (req, res) => {
   try {
     const { jobId } = req.params;
+    const { type } = req.body; // 'request_changes' or 'final_reject'
+
     const job = jobStorage.get(jobId);
     const jobData = jobFiles.get(jobId);
 
@@ -615,35 +627,62 @@ app.post("/api/jobs/:jobId/reject", async (req, res) => {
       return res.status(400).json({ error: "Job must be in submitted state" });
     }
 
-    // Refund remaining funds from escrow to client
-    const refundTransactionHash = await refundFundsToClient(jobId);
+    // Default to 'request_changes' if not specified (safer default)
+    const rejectType = type || 'request_changes';
 
-    // Update job state
-    job.state = 3; // Rejected
-    job.refundTransactionHash = refundTransactionHash;
-    job.rejectedAt = new Date().toISOString();
-    jobStorage.set(jobId, job);
+    if (rejectType === 'final_reject') {
+      // 1. FINAL REJECTION -> REFUND CLIENT
+      // Refund remaining funds from escrow to client
+      const refundTransactionHash = await refundFundsToClient(jobId);
 
-    // Mark file data as rejected if exists
-    if (jobData) {
-      jobData.rejected = true;
-      jobData.rejectedAt = new Date().toISOString();
-      jobFiles.set(jobId, jobData);
+      // Update job state
+      job.state = 3; // Rejected (Final)
+      job.refundTransactionHash = refundTransactionHash;
+      job.rejectedAt = new Date().toISOString();
+      jobStorage.set(jobId, job);
+
+      // Mark file data as rejected if exists
+      if (jobData) {
+        jobData.rejected = true;
+        jobData.rejectedAt = new Date().toISOString();
+        jobFiles.set(jobId, jobData);
+      }
+
+      console.log(`❌ Job ${jobId} rejected (FINAL)! Funds refunded to client`);
+
+      res.json({
+        success: true,
+        message: "Job rejected and funds refunded to client",
+        jobId,
+        refundTransactionHash,
+        status: "rejected"
+      });
+
+    } else {
+      // 2. REQUEST CHANGES -> ALLOW RESUBMISSION (NO REFUND)
+
+      // Update job state to 4 (Revision Requested)
+      job.state = 4; // Revision Requested
+      job.revisionRequestedAt = new Date().toISOString();
+      // Reset submitted flag? Maybe not needed if we track state
+      jobStorage.set(jobId, job);
+
+      console.log(`↩️ Job ${jobId} revision requested. Funds remain in escrow.`);
+
+      res.json({
+        success: true,
+        message: "Revision requested. Freelancer can resubmit.",
+        jobId,
+        status: "revision_requested"
+      });
     }
 
-    console.log(`❌ Job ${jobId} rejected! Funds refunded to client`);
-
-    res.json({
-      success: true,
-      message: "Job rejected and funds refunded to client",
-      jobId,
-      refundTransactionHash,
-    });
   } catch (error) {
     console.error("Error rejecting job:", error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 /**
  * GET /api/jobs/:jobId/status
@@ -729,7 +768,7 @@ app.post("/api/jobs/:jobId/release-initial-payment", (req, res) => {
  * POST /api/jobs/:jobId/raise-fraud-flag
  * Raise fraud flag on freelancer
  */
-app.post("/api/jobs/:jobId/raise-fraud-flag", (req, res) => {
+app.post("/api/jobs/:jobId/raise-fraud-flag", async (req, res) => {
   try {
     const { jobId } = req.params;
     const { clientAddress } = req.body;
@@ -739,39 +778,41 @@ app.post("/api/jobs/:jobId/raise-fraud-flag", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    // Verify client is the one raising flag
     if (job.client !== clientAddress) {
-      return res.status(403).json({ error: "Unauthorized: Only client can raise fraud flag" });
-    }
-
-    if (!job.initialPaymentReleased) {
-      return res.status(400).json({ error: "Cannot raise fraud flag: Initial payment not released" });
-    }
-
-    if (job.state !== 0) {
-      return res.status(400).json({ error: "Cannot raise fraud flag: Work already submitted or completed" });
+      return res.status(403).json({ error: "Only the client can raise a fraud flag" });
     }
 
     if (job.fraudFlagRaised) {
       return res.status(400).json({ error: "Fraud flag already raised" });
     }
 
-    // Set fraud flag
+    // New logic: Auto-refund and terminate contract
+    console.log(`🚨 Fraud flag raised on job ${jobId}. Initiating refund and termination.`);
+
+    // 1. Refund remaining funds from escrow to client
+    const refundTransactionHash = await refundFundsToClient(jobId);
+
+    // 2. Update job state
     job.fraudFlagRaised = true;
     job.fraudFlagTimestamp = new Date().toISOString();
+    job.state = 3; // Rejected / Terminated
+    job.refundTransactionHash = refundTransactionHash;
+    job.rejectedAt = new Date().toISOString(); // Treating fraud as a form of rejection/termination
+
     jobStorage.set(jobId, job);
 
-    // Track fraud flag by freelancer address
-    if (!fraudFlags.has(job.freelancer)) {
-      fraudFlags.set(job.freelancer, []);
-    }
-    fraudFlags.get(job.freelancer).push({
+    // Save fraud record
+    fraudReportStorage.set(`${jobId}-${clientAddress}`, {
       jobId,
-      timestamp: job.fraudFlagTimestamp,
+      client: clientAddress,
+      freelancer: job.freelancer,
+      timestamp: new Date().toISOString(),
       amount: job.amount,
       description: job.description,
     });
 
-    console.log(`🚨 Fraud flag raised on job ${jobId} for freelancer ${job.freelancer}`);
+    console.log(`🚨 Job ${jobId} terminated due to fraud flag. Funds refunded: ${refundTransactionHash}`);
 
     // Auto-save to IPFS
     saveJobsToIPFS().catch(err => {
@@ -782,8 +823,10 @@ app.post("/api/jobs/:jobId/raise-fraud-flag", (req, res) => {
       success: true,
       jobId,
       freelancer: job.freelancer,
-      message: "Fraud flag raised successfully",
+      message: "Fraud flag raised. Contract terminated and funds refunded to client.",
       fraudFlagTimestamp: job.fraudFlagTimestamp,
+      refundTransactionHash,
+      status: "terminated"
     });
   } catch (error) {
     console.error("Error raising fraud flag:", error);

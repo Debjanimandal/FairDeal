@@ -15,7 +15,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [approving, setApproving] = useState<boolean>(false);
   const [rejecting, setRejecting] = useState<boolean>(false);
-  const [raisingFlag, setRaisingFlag] = useState<boolean>(false);
+
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
@@ -54,12 +54,14 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const getStateLabel = (state: number) => {
+    if (job?.fraudFlagRaised) return "⛔ Terminated (Fraud Flag)";
+
     const labels: { [key: number]: string } = {
       0: "Created",
       1: "Submitted",
       2: "Approved",
       3: "Rejected",
-      4: "Refunded",
+      4: "Revision Requested",
     };
     return labels[state] || "Unknown";
   };
@@ -70,7 +72,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
       1: "status-submitted",
       2: "status-approved",
       3: "status-rejected",
-      4: "status-refunded",
+      4: "status-warning", // Use warning color for revision
     };
     return states[state] || "status-created";
   };
@@ -93,14 +95,15 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const handleReject = async () => {
-    if (window.confirm("Are you sure you want to reject this job?")) {
+    if (window.confirm("Request revision from freelancer? Funds will remain in escrow.")) {
       setRejecting(true);
       try {
-        await axios.post(`http://localhost:5000/api/jobs/${jobId}/reject`);
-        alert("Job rejected. The original file will not be revealed.");
+        // Default reject (type: request_changes)
+        await axios.post(`http://localhost:5000/api/jobs/${jobId}/reject`, { type: 'request_changes' });
+        alert("Revision requested. Freelancer has been notified to resubmit.");
         loadJobDetails();
       } catch (err: any) {
-        setError("Failed to reject job: " + err.message);
+        setError("Failed to request revision: " + err.message);
       } finally {
         setRejecting(false);
       }
@@ -108,21 +111,21 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const handleRaiseFraudFlag = async () => {
-    if (window.confirm("Are you sure you want to raise a fraud flag on this freelancer? This action is permanent and will be recorded on the blockchain.")) {
-      setRaisingFlag(true);
+    if (window.confirm("🚨 Are you sure you want to RAISE A FRAUD FLAG? This will strictly terminate the contract and refund 90% of funds to you immediately.")) {
+      setRejecting(true);
       try {
-        const response = await axios.post(`http://localhost:5000/api/jobs/${jobId}/raise-fraud-flag`, {
-          clientAddress: wallet,
-        });
-        alert("Fraud flag raised successfully. This will be visible on the freelancer's profile.");
+        await axios.post(`http://localhost:5000/api/jobs/${jobId}/raise-fraud-flag`, { clientAddress: wallet });
+        alert("Fraud flag raised. Contract terminated and funds refunded.");
         loadJobDetails();
       } catch (err: any) {
         setError("Failed to raise fraud flag: " + err.message);
       } finally {
-        setRaisingFlag(false);
+        setRejecting(false);
       }
     }
   };
+
+
 
   if (loading) return <div className="loading">Loading job details...</div>;
   if (!job) return <div className="error-message">Job not found</div>;
@@ -132,7 +135,11 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
   // Effective state: If we have preview data (jobStatus), treat state as 1 (Submitted) 
   // unless it's already higher (Approved/Rejected)
-  const effectiveState = (job.state === 0 && jobStatus) ? 1 : job.state;
+  // Effective state priority:
+  // 1. Fraud Flag -> 3 (Terminated)
+  // 2. State 0 + Submission -> 1 (Submitted)
+  // 3. Otherwise -> Actual State
+  const effectiveState = job.fraudFlagRaised ? 3 : ((job.state === 0 && jobStatus) ? 1 : job.state);
 
   return (
     <div>
@@ -247,9 +254,9 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
           <button
             className="btn btn-danger"
             onClick={handleRaiseFraudFlag}
-            disabled={raisingFlag}
+            disabled={rejecting}
           >
-            {raisingFlag ? "Raising Flag..." : "🚨 Raise Fraud Flag"}
+            {rejecting ? "Raising Flag..." : "🚨 Raise Fraud Flag"}
           </button>
         </div>
       )}
@@ -285,22 +292,42 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
               {/* Debug info - remove later */}
               <div style={{ display: 'none' }}>state: {job.state}, effective: {effectiveState}</div>
 
-              <button
-                className="btn btn-success"
-                onClick={handleApprove}
-                disabled={approving || effectiveState !== 1}
-                style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
-              >
-                {approving ? "Releasing Funds..." : "✅ Approve & Release Funds"}
-              </button>
-              <button
-                className="btn btn-danger"
-                onClick={handleReject}
-                disabled={rejecting || effectiveState !== 1}
-                style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
-              >
-                {rejecting ? "Refunding..." : "❌ Reject & Refund Client"}
-              </button>
+              {effectiveState === 3 ? (
+                <div className="message-alert alert-error" style={{ width: '100%', textAlign: 'center', fontWeight: 'bold' }}>
+                  🚫 Contract Terminated & Refunded (Fraud Flag). No further actions allowed.
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-success"
+                    onClick={handleApprove}
+                    disabled={approving || effectiveState !== 1}
+                    style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
+                  >
+                    {approving ? "Releasing Funds..." : "✅ Approve & Pay"}
+                  </button>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <button
+                      className="btn btn-warning"
+                      onClick={handleReject}
+                      disabled={rejecting || effectiveState !== 1}
+                      style={{ width: '100%', opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer', background: '#f59e0b', color: 'white' }}
+                    >
+                      {rejecting ? "Processing..." : "↩️ Request Revision"}
+                    </button>
+
+                    {effectiveState === 1 && (
+                      <button
+                        onClick={handleRaiseFraudFlag}
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        End Contract & Raise Flag
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )
@@ -308,18 +335,22 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       {/* Submit Work (for Freelancer) */}
       {
-        isFreelancer && effectiveState === 0 && (
+        isFreelancer && (effectiveState === 0 || effectiveState === 4) && (
           <div className="glass-card" style={{ marginTop: "2rem", textAlign: "center", padding: "3rem" }}>
-            <h3 style={{ marginBottom: "1rem" }}>Ready to submit?</h3>
+            <h3 style={{ marginBottom: "1rem" }}>
+              {effectiveState === 4 ? "↩️ Revision Requested" : "Ready to submit?"}
+            </h3>
             <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
-              Upload your work to the secure vault to start the review process.
+              {effectiveState === 4
+                ? "The client successfully requested changes. Please upload a new version."
+                : "Upload your work to the secure vault to start the review process."}
             </p>
             <button
               className="btn btn-primary"
               onClick={() => navigate(`/job/${jobId}/submit`)}
               style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}
             >
-              📤 Upload Work File
+              📤 {effectiveState === 4 ? "Upload Revised Work" : "Upload Work File"}
             </button>
           </div>
         )
