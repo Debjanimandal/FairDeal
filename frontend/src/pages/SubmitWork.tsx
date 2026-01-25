@@ -10,7 +10,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
   const { jobId } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
@@ -18,16 +18,16 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile) {
-        if (selectedFile.size > 50 * 1024 * 1024) {
-          // 50MB limit
-          setError("File size must be less than 50MB");
-          return;
-        }
-        setFile(selectedFile);
-        setError("");
+      const selectedFiles = Array.from(e.target.files);
+      const totalSize = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+
+      if (totalSize > 50 * 1024 * 1024) {
+        setError("Total size must be less than 50MB");
+        return;
       }
+
+      setFiles(selectedFiles);
+      setError("");
     }
   };
 
@@ -48,17 +48,17 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
     e.stopPropagation();
     e.currentTarget.classList.remove("active");
 
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile(droppedFile);
+    if (e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      setFiles(droppedFiles);
       setError("");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) {
-      setError("Please select a file");
+    if (files.length === 0) {
+      setError("Please select files or a folder");
       return;
     }
 
@@ -70,7 +70,11 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
       const formData = new FormData();
       formData.append("jobId", jobId || "");
       formData.append("freelancerAddress", wallet || "");
-      formData.append("file", file);
+
+      // Append all files
+      files.forEach(file => {
+        formData.append("files[]", file);
+      });
 
       const response = await axios.post("http://localhost:5000/api/jobs/submit-work", formData, {
         headers: {
@@ -80,7 +84,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
 
       setSuccess("Work submitted successfully!");
       setSubmissionData(response.data);
-      setFile(null);
+      setFiles([]);
     } catch (err: any) {
       setError(
         err.response?.data?.error ||
@@ -118,14 +122,16 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
         {!submissionData ? (
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Select File to Upload *</label>
+              <label>Select Code Folder or Files to Upload *</label>
 
-              {/* Standard visible file input */}
+              {/* Folder/File input */}
               <input
                 ref={fileInputRef}
                 type="file"
                 onChange={handleFileChange}
                 className="form-input"
+                multiple
+                {...({ webkitdirectory: "", directory: "" } as any)}
                 style={{
                   padding: "0.75rem",
                   cursor: "pointer",
@@ -133,7 +139,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
                 }}
               />
 
-              {file && (
+              {files.length > 0 && (
                 <div
                   style={{
                     padding: "1rem",
@@ -144,16 +150,18 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                    <span style={{ color: "var(--text-muted)" }}>File Name:</span>
-                    <strong>{file.name}</strong>
+                    <span style={{ color: "var(--text-muted)" }}>Files Selected:</span>
+                    <strong>{files.length} file(s)</strong>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                    <span style={{ color: "var(--text-muted)" }}>Size:</span>
-                    <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span style={{ color: "var(--text-muted)" }}>Total Size:</span>
+                    <span>{(files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(2)} MB</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "var(--text-muted)" }}>Type:</span>
-                    <span>{file.type || "Unknown"}</span>
+                  <div style={{ marginTop: "0.75rem", maxHeight: "150px", overflowY: "auto" }}>
+                    <div style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "0.5rem" }}>Files:</div>
+                    {files.map((f, idx) => (
+                      <div key={idx} style={{ fontSize: "0.85rem", padding: "0.25rem 0" }}>• {f.name}</div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -162,10 +170,11 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
                 <div>
                   <strong>🔐 Security & Privacy Process:</strong>
                   <ol style={{ marginTop: "0.5rem", marginLeft: "1.5rem", lineHeight: "1.6" }}>
-                    <li>Original file will be encrypted locally with AES-256</li>
-                    <li>A separate watermarked preview will be generated</li>
-                    <li>Both versions are pinned to IPFS for permanence</li>
-                    <li>Client only sees the preview until they approve payment</li>
+                    <li>Code folder will be compressed into ZIP and encrypted with AES-256</li>
+                    <li>A code execution preview will be generated for client review</li>
+                    <li>Both encrypted ZIP and preview are pinned to IPFS</li>
+                    <li>Client sees only execution preview until they approve payment</li>
+                    <li>Source code is revealed only after approval</li>
                   </ol>
                 </div>
               </div>
@@ -175,10 +184,10 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={!file || loading}
+                disabled={files.length === 0 || loading}
                 style={{ flex: 2, padding: "1rem" }}
               >
-                {loading ? "Uploading & Encrypting..." : "✅ Submit Work Securely"}
+                {loading ? "Uploading & Processing..." : `✅ Submit ${files.length > 0 ? files.length + ' File(s)' : 'Work'} Securely`}
               </button>
 
               <button
@@ -201,14 +210,22 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
                 <strong style={{ color: "var(--text-muted)" }}>Job ID:</strong> {submissionData.jobId}
               </p>
               <p style={{ marginBottom: "0.5rem" }}>
-                <strong style={{ color: "var(--text-muted)" }}>Preview CID:</strong>
-                <span style={{ fontFamily: "monospace", marginLeft: "0.5rem", color: "var(--primary)" }}>{submissionData.previewCID}</span>
+                <strong style={{ color: "var(--text-muted)" }}>Job ID:</strong> {submissionData.jobId}
               </p>
+
+              {submissionData.previewCID && (
+                <p style={{ marginBottom: "0.5rem" }}>
+                  <strong style={{ color: "var(--text-muted)" }}>Preview CID:</strong>
+                  <span style={{ fontFamily: "monospace", marginLeft: "0.5rem", color: "var(--primary)" }}>{submissionData.previewCID}</span>
+                </p>
+              )}
 
               <div className="message-alert alert-info" style={{ marginTop: "1.5rem" }}>
                 <strong>Preview URL:</strong>
-                <div className="preview-url" style={{ marginTop: "0.5rem" }}>
-                  https://w3s.link/ipfs/{submissionData.previewCID}
+                <div className="preview-url" style={{ marginTop: "0.5rem", wordBreak: "break-all" }}>
+                  <a href={submissionData.previewURL || `https://w3s.link/ipfs/${submissionData.previewCID}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>
+                    {submissionData.previewURL || `https://w3s.link/ipfs/${submissionData.previewCID}`}
+                  </a>
                 </div>
                 <p style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
                   Share this link with the client if needed. They can review it directly from their dashboard.

@@ -8,6 +8,8 @@ const pinataSDK = require("@pinata/sdk");
 const fs = require("fs");
 const path = require("path");
 const StellarSdk = require("@stellar/stellar-sdk");
+const { exec } = require("child_process");
+const AdmZip = require("adm-zip");
 
 const app = express();
 
@@ -212,7 +214,100 @@ class WatermarkManager {
   }
 }
 
+
+
 const watermarkManager = new WatermarkManager();
+
+/**
+ * Code Execution Utilities
+ */
+class CodeExecutionManager {
+  async executeCode(files) {
+    // Create a temporary directory
+    const tempDir = path.join(__dirname, "temp_execution", `job-${Date.now()}`);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    try {
+      // Write files to temp dir
+      for (const file of files) {
+        const filePath = path.join(tempDir, file.originalname);
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(filePath, file.buffer);
+      }
+
+      // Detect and run
+      let command = "";
+      if (fs.existsSync(path.join(tempDir, "package.json"))) {
+        // Simple install and test/run
+        command = `cd "${tempDir}" && npm install && (npm test || node index.js)`;
+      } else if (fs.existsSync(path.join(tempDir, "main.py"))) {
+        command = `cd "${tempDir}" && python main.py`;
+      } else if (fs.existsSync(path.join(tempDir, "index.js"))) {
+        command = `cd "${tempDir}" && node index.js`;
+      } else if (fs.existsSync(path.join(tempDir, "App.java"))) {
+        command = `cd "${tempDir}" && javac App.java && java App`;
+      } else if (fs.existsSync(path.join(tempDir, "index.html"))) {
+        // Serve HTML directly
+        const htmlContent = fs.readFileSync(path.join(tempDir, "index.html"), "utf-8");
+        // Cleanup immediately
+        try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (e) { }
+
+        return { type: "html", output: htmlContent };
+      } else {
+        // Check for any HTML file if index.html is missing
+        const htmlFile = files.find(f => f.originalname.endsWith(".html"));
+        if (htmlFile) {
+          const htmlContent = htmlFile.buffer.toString("utf-8");
+          try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (e) { }
+          return { type: "html", output: htmlContent };
+        }
+
+        return { type: "unknown", output: "No runnable entry point found (package.json, main.py, index.js, App.java). Submitted files: " + files.map(f => f.originalname).join(", ") };
+      }
+
+      // Execute
+      return new Promise((resolve) => {
+        exec(command, { timeout: 30000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+          // Cleanup
+          try {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+          } catch (e) { console.error("Cleanup error", e); }
+
+          if (error) {
+            // Return stdout/stderr even on error as it might contain useful info
+            resolve({ type: "error", output: `Execution Error: ${error.message}\n\nOutput:\n${stdout}\n\nErrors:\n${stderr}` });
+          } else {
+            resolve({ type: "success", output: stdout || "Execution completed with no output." });
+          }
+        });
+      });
+
+    } catch (err) {
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch (e) { }
+      return { type: "error", output: err.message };
+    }
+  }
+}
+
+const codeExecutionManager = new CodeExecutionManager();
+
+async function createZipFromFiles(files) {
+  const zip = new AdmZip();
+  for (const file of files) {
+    zip.addFile(file.originalname, file.buffer);
+  }
+  return zip.toBuffer();
+}
+
+
+
 
 /**
  * IPFS upload utilities using Pinata
@@ -454,16 +549,16 @@ app.get("/api/jobs/:jobId", (req, res) => {
 
 /**
  * POST /api/jobs/submit-work
- * Submit work for a job
- * Body: jobId, freelancerAddress, file
+ * Submit work for a job - supports both folder upload (multiple files) and single file
+ * Body: jobId, freelancerAddress, files[]
  */
-app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
+app.post("/api/jobs/submit-work", upload.array("files[]", 50), async (req, res) => {
   try {
     const { jobId, freelancerAddress } = req.body;
-    const file = req.file;
+    const files = req.files;
 
-    if (!jobId || !file) {
-      return res.status(400).json({ error: "Missing jobId or file" });
+    if (!jobId || !files || files.length === 0) {
+      return res.status(400).json({ error: "Missing jobId or files" });
     }
 
     const job = jobStorage.get(jobId);
@@ -471,55 +566,79 @@ app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // Allow submission only if Created (0) or Revision Requested (4)
     if (job.state !== 0 && job.state !== 4) {
       return res.status(400).json({ error: "Cannot submit work. Contract is not in a submittable state." });
     }
 
-    // Generate encryption key
+    console.log(`📁 Processing ${files.length} file(s) for job ${jobId}`);
+
+    // Check for code submission (Folder OR single non-image file)
+    const isImage = files.length === 1 && files[0].mimetype.startsWith('image/');
+    const isCodeSubmission = !isImage;
+
+    let originalBuffer, previewBuffer, fileName, previewCID;
+    let previewText = '';
+
+    if (isCodeSubmission) {
+      console.log(`💻 Code submission detected (${files.length} files)`);
+
+      // Even for single code file, we ZIP it for consistent encryption/download
+      const zipBuffer = await createZipFromFiles(files);
+      originalBuffer = zipBuffer;
+      fileName = files.length > 1 ? `code-${jobId}.zip` : `${files[0].originalname}.zip`;
+
+      const executionResult = await codeExecutionManager.executeCode(files);
+      console.log(`✅ Code execution completed: ${executionResult.type}`);
+
+      previewText = executionResult.output; // Store as text
+    } else {
+      console.log(`� Image submission detected: ${files[0].originalname}`);
+      originalBuffer = files[0].buffer;
+      fileName = files[0].originalname;
+      previewBuffer = await watermarkManager.addWatermark(files[0].buffer, `Job ${jobId}`);
+
+      // For image files, upload watermarked image to IPFS
+      previewCID = await uploadToIPFS(previewBuffer, `${jobId}-preview-${Date.now()}`);
+      console.log(`👁️ Preview uploaded to IPFS: ${previewCID}`);
+      previewText = `Preview available at: https://gateway.pinata.cloud/ipfs/${previewCID}`;
+    }
+
     const encryptionKey = encryptionManager.generateKey();
+    const encrypted = encryptionManager.encryptFile(originalBuffer, encryptionKey);
 
-    // Encrypt the original file
-    const encrypted = encryptionManager.encryptFile(file.buffer, encryptionKey);
-
-    // Upload encrypted original to IPFS
     const originalCID = await uploadToIPFS(encrypted.encrypted, `${jobId}-original-${Date.now()}`);
+    console.log(`📦 Encrypted original uploaded to IPFS: ${originalCID}`);
 
-    // Create watermarked preview
-    const watermarked = await watermarkManager.addWatermark(file.buffer, `Job ${jobId}`);
-
-    // Upload watermarked preview to IPFS
-    const previewCID = await uploadToIPFS(watermarked, `${jobId}-preview-${Date.now()}`);
-
-    // Store job data in memory
     jobFiles.set(jobId, {
       jobId,
       freelancerAddress,
       originalCID,
-      previewCID,
+      previewCID: previewCID || null,
+      previewText: previewText, // Store preview text instead of CID
       encryptionKey: encryptionKey.toString("hex"),
       encryptionIV: encrypted.iv.toString("hex"),
       submittedAt: new Date().toISOString(),
-      fileName: file.originalname,
-      fileSize: file.size,
+      fileName: fileName,
+      fileSize: originalBuffer.length,
+      isCodeFolder: isCodeSubmission, // Rename/Reuse property for "Code Mode"
+      fileCount: files.length,
     });
 
-    // Update job state in main storage
-    // Update job state in main storage (job already fetched above)
     if (job) {
-      job.state = 1; // Submitted
+      job.state = 1;
       jobStorage.set(jobId, job);
       console.log(`✅ Job ${jobId} state updated to 1 (Submitted)`);
-    } else {
-      console.warn(`⚠️ Job ${jobId} not found in storage during submission`);
     }
 
     res.json({
       success: true,
       jobId,
-      previewCID,
-      originalCID, // Don't reveal original CID until approved
-      message: "Work submitted successfully. Preview is now visible to client.",
+      previewURL: `http://localhost:5000/api/jobs/${jobId}/preview-content`,
+      isCodeFolder: isCodeSubmission,
+      fileCount: files.length,
+      message: isCodeSubmission
+        ? `Code submission (${files.length} files) successful. Preview available via backend API.`
+        : "Work submitted successfully. Preview is visible to client.",
     });
   } catch (error) {
     console.error("Error submitting work:", error);
@@ -527,9 +646,43 @@ app.post("/api/jobs/submit-work", upload.single("file"), async (req, res) => {
   }
 });
 
+
 /**
  * GET /api/jobs/:jobId/preview
  * Get preview CID and metadata
+ */
+/**
+ * GET /api/jobs/:jobId/preview-content
+ * Serve raw preview content (text)
+ */
+app.get("/api/jobs/:jobId/preview-content", (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const jobData = jobFiles.get(jobId);
+
+    if (!jobData) {
+      return res.status(404).send("Job data not found");
+    }
+
+    if (jobData.previewText) {
+      if (jobData.previewText.trim().startsWith("<!DOCTYPE") || jobData.previewText.trim().startsWith("<html")) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      } else {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      }
+      res.send(jobData.previewText);
+    } else {
+      res.status(404).send("No text preview available");
+    }
+  } catch (error) {
+    console.error("Error serving preview content:", error);
+    res.status(500).send("Error serving preview");
+  }
+});
+
+/**
+ * GET /api/jobs/:jobId/preview
+ * Get preview metadata (JSON) used by frontend to check status
  */
 app.get("/api/jobs/:jobId/preview", (req, res) => {
   try {
@@ -540,13 +693,18 @@ app.get("/api/jobs/:jobId/preview", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    // Always return JSON metadata
     res.json({
       jobId,
-      previewCID: jobData.previewCID,
-      previewURL: `https://gateway.pinata.cloud/ipfs/${jobData.previewCID}`,
+      // If it's a code folder, point to the content endpoint
+      // If it has previewText (code submission), point to local content
+      previewURL: jobData.previewText && !jobData.previewText.startsWith("Preview available")
+        ? `http://localhost:5000/api/jobs/${jobId}/preview-content`
+        : `https://gateway.pinata.cloud/ipfs/${jobData.previewCID}`,
       fileName: jobData.fileName,
       submittedAt: jobData.submittedAt,
-      message: "Preview is ready. Share this URL to view the watermarked preview.",
+      isCodeFolder: jobData.isCodeFolder,
+      message: "Preview is ready.",
     });
   } catch (error) {
     console.error("Error getting preview:", error);
