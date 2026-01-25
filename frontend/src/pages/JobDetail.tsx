@@ -22,6 +22,12 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   }, [jobId]);
 
   const loadJobDetails = async () => {
+    if (!jobId) {
+      setError("Job ID not found");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Fetch real job data from backend
       const response = await axios.get(API_ENDPOINTS.JOB_DETAIL(jobId));
@@ -77,6 +83,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const handleApprove = async () => {
+    if (!jobId) return;
     setApproving(true);
     try {
       const response = await axios.post(API_ENDPOINTS.JOB_APPROVE(jobId));
@@ -94,6 +101,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const handleReject = async () => {
+    if (!jobId) return;
     if (window.confirm("Request revision from freelancer? Funds will remain in escrow.")) {
       setRejecting(true);
       try {
@@ -110,6 +118,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   };
 
   const handleRaiseFraudFlag = async () => {
+    if (!jobId) return;
     if (window.confirm("🚨 Are you sure you want to RAISE A FRAUD FLAG? This will strictly terminate the contract and refund 90% of funds to you immediately.")) {
       setRejecting(true);
       try {
@@ -441,7 +450,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
                       <strong>Download Unencrypted File:</strong>
                       <div style={{ wordBreak: "break-all", marginTop: "0.5rem" }}>
                         <a
-                          href={API_ENDPOINTS.JOB_DOWNLOAD(jobId)}
+                          href={jobId ? API_ENDPOINTS.JOB_DOWNLOAD(jobId) : '#'}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn-primary"

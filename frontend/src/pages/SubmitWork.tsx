@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from '../config/api';
 
 interface SubmitWorkProps {
   wallet: string | null;
