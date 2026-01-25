@@ -76,7 +76,7 @@ const SubmitWork: React.FC<SubmitWorkProps> = ({ wallet }) => {
         formData.append("files[]", file);
       });
 
-      const response = await axios.post("http://localhost:5000/api/jobs/submit-work", formData, {
+      const response = await axios.post(API_ENDPOINTS.SUBMIT_WORK, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

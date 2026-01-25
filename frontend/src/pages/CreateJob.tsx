@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from '../config/api';
 import { executePayment } from "../utils/stellar-utils";
 
 interface CreateJobProps {
@@ -88,7 +89,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
       );
 
       // Get escrow address from backend
-      const escrowResponse = await axios.get("http://localhost:5000/api/escrow-address");
+      const escrowResponse = await axios.get(API_ENDPOINTS.ESCROW_ADDRESS);
       if (!escrowResponse.data.success || !escrowResponse.data.escrowAddress) {
         throw new Error("Failed to fetch escrow address");
       }
@@ -123,7 +124,7 @@ const CreateJob: React.FC<CreateJobProps> = ({ wallet }) => {
       deadlineDate.setDate(deadlineDate.getDate() + parseInt(formData.deadlineDays));
 
       // Create job on backend (now includes BOTH transaction hashes)
-      const response = await axios.post("http://localhost:5000/api/jobs", {
+      const response = await axios.post(API_ENDPOINTS.JOBS, {
         client: wallet,
         freelancer: formData.freelancerAddress,
         amount: formData.amount,

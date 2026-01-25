@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import axios from "axios";import { API_ENDPOINTS } from '../config/api';
 interface JobDetailProps {
   wallet: string | null;
   userRole: string | null;
@@ -25,7 +24,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   const loadJobDetails = async () => {
     try {
       // Fetch real job data from backend
-      const response = await axios.get(`http://localhost:5000/api/jobs/${jobId}`);
+      const response = await axios.get(API_ENDPOINTS.JOB_DETAIL(jobId));
 
       if (response.data.success) {
         setJob(response.data.job);
@@ -38,7 +37,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
 
       // Load submission status from backend
       try {
-        const statusResponse = await axios.get(`http://localhost:5000/api/jobs/${jobId}/preview`);
+        const statusResponse = await axios.get(API_ENDPOINTS.JOB_PREVIEW(jobId));
         setJobStatus(statusResponse.data);
       } catch (err) {
         // Not submitted yet
@@ -80,7 +79,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
   const handleApprove = async () => {
     setApproving(true);
     try {
-      const response = await axios.post(`http://localhost:5000/api/jobs/${jobId}/approve`);
+      const response = await axios.post(API_ENDPOINTS.JOB_APPROVE(jobId));
 
       alert(`Job approved! Original file CID: ${response.data.originalCID}`);
       alert(`Decryption Key: ${response.data.decryptionKey}`);
@@ -99,7 +98,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
       setRejecting(true);
       try {
         // Default reject (type: request_changes)
-        await axios.post(`http://localhost:5000/api/jobs/${jobId}/reject`, { type: 'request_changes' });
+        await axios.post(API_ENDPOINTS.JOB_REJECT(jobId), { type: 'request_changes' });
         alert("Revision requested. Freelancer has been notified to resubmit.");
         loadJobDetails();
       } catch (err: any) {
@@ -114,7 +113,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
     if (window.confirm("🚨 Are you sure you want to RAISE A FRAUD FLAG? This will strictly terminate the contract and refund 90% of funds to you immediately.")) {
       setRejecting(true);
       try {
-        await axios.post(`http://localhost:5000/api/jobs/${jobId}/raise-fraud-flag`, { clientAddress: wallet });
+        await axios.post(API_ENDPOINTS.JOB_FRAUD_FLAG(jobId), { clientAddress: wallet });
         alert("Fraud flag raised. Contract terminated and funds refunded.");
         loadJobDetails();
       } catch (err: any) {
@@ -442,7 +441,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
                       <strong>Download Unencrypted File:</strong>
                       <div style={{ wordBreak: "break-all", marginTop: "0.5rem" }}>
                         <a
-                          href={`http://localhost:5000/api/jobs/${jobId}/download`}
+                          href={API_ENDPOINTS.JOB_DOWNLOAD(jobId)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn-primary"

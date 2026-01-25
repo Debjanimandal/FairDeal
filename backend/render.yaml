@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: fairdeal-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: WEB3_STORAGE_TOKEN
+        sync: false
+      - key: STELLAR_CONTRACT_ID
+        sync: false
+      - key: STELLAR_NETWORK
+        value: testnet
+      - key: SOROBAN_RPC_URL
+        value: https://soroban-testnet.stellar.org
