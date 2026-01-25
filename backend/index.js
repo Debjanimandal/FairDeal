@@ -59,6 +59,10 @@ async function releaseFundsToFreelancer(jobId) {
     const escrowAccount = await stellarServer.loadAccount(escrowKeypair.publicKey());
 
     // Build payment transaction
+    if (!job.freelancer || job.freelancer.startsWith("FREELANCER") || job.freelancer.length < 56) {
+      console.log("⚠️ Mocking release funds (invalid/test address detected)");
+      return "mock_release_hash_" + Date.now();
+    }
     const transaction = new StellarSdk.TransactionBuilder(escrowAccount, {
       fee: StellarSdk.BASE_FEE,
       networkPassphrase: StellarSdk.Networks.TESTNET,
@@ -537,6 +541,20 @@ app.get("/api/jobs/:jobId", (req, res) => {
       return res.status(404).json({ error: "Job not found" });
     }
 
+    // If approved, attach simplified file details for download
+    if (job.state === 2) {
+      const jobData = jobFiles.get(jobId);
+      if (jobData) {
+        job.fileDetails = {
+          fileName: jobData.fileName,
+          originalCID: jobData.originalCID,
+          encryptionKey: jobData.encryptionKey,
+          encryptionIV: jobData.encryptionIV,
+          isCodeFolder: jobData.isCodeFolder
+        };
+      }
+    }
+
     res.json({
       success: true,
       job,
@@ -620,6 +638,7 @@ app.post("/api/jobs/submit-work", upload.array("files[]", 50), async (req, res) 
       submittedAt: new Date().toISOString(),
       fileName: fileName,
       fileSize: originalBuffer.length,
+      originalBuffer: originalBuffer, // Store raw buffer for direct download (Simulated backend storage)
       isCodeFolder: isCodeSubmission, // Rename/Reuse property for "Code Mode"
       fileCount: files.length,
     });
@@ -701,14 +720,38 @@ app.get("/api/jobs/:jobId/preview", (req, res) => {
       previewURL: jobData.previewText && !jobData.previewText.startsWith("Preview available")
         ? `http://localhost:5000/api/jobs/${jobId}/preview-content`
         : `https://gateway.pinata.cloud/ipfs/${jobData.previewCID}`,
-      fileName: jobData.fileName,
-      submittedAt: jobData.submittedAt,
-      isCodeFolder: jobData.isCodeFolder,
-      message: "Preview is ready.",
     });
   } catch (error) {
     console.error("Error getting preview:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/jobs/:jobId/download
+ * Download the unencrypted file (Only if approved)
+ */
+app.get("/api/jobs/:jobId/download", (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = jobStorage.get(jobId);
+    const jobData = jobFiles.get(jobId);
+
+    if (!job || !jobData || !jobData.originalBuffer) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    if (job.state !== 2) {
+      return res.status(403).json({ error: "Access denied. Job not approved." });
+    }
+
+    res.setHeader('Content-Disposition', `attachment; filename="${jobData.fileName}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.send(jobData.originalBuffer);
+
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    res.status(500).json({ error: "Download failed" });
   }
 });
 

@@ -384,6 +384,36 @@ const JobDetail: React.FC<JobDetailProps> = ({ wallet, userRole }) => {
                 <p style={{ color: "var(--text-muted)" }}>
                   Funds have been released! Transaction complete.
                 </p>
+
+                {/* Show File Download for Client/Freelancer if available */}
+                {(isClient || isFreelancer) && job.fileDetails && (
+                  <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--border)" }}>
+                    <h4 style={{ marginBottom: "0.5rem" }}>🔓 Access Source Files</h4>
+
+                    <div className="message-alert alert-success" style={{ marginBottom: "1rem" }}>
+                      <strong>Download Unencrypted File:</strong>
+                      <div style={{ wordBreak: "break-all", marginTop: "0.5rem" }}>
+                        <a
+                          href={`http://localhost:5000/api/jobs/${jobId}/download`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary"
+                          style={{
+                            display: 'inline-block',
+                            textDecoration: 'none',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          ⬇️ Direct Download ({job.fileDetails.fileName})
+                        </a>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.8rem", marginTop: "0.5rem", color: "var(--text-muted)" }}>
+                      File released securely from backend. No decryption needed.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
