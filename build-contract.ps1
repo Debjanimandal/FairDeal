@@ -1,40 +1,29 @@
-# FairDeal - Smart Contract Build & Deploy Script
+# Build Soroban smart contract (PowerShell)
+Write-Host "🔨 Building FairDeal Soroban Smart Contract..." -ForegroundColor Cyan
 
-Write-Host "🚀 Building FairDeal Smart Contract..." -ForegroundColor Cyan
-Write-Host ""
-
-# Check if stellar CLI is installed
-if (-not (Get-Command stellar -ErrorAction SilentlyContinue)) {
-    Write-Host "❌ Stellar CLI not found!" -ForegroundColor Red
-    Write-Host "Install it with: cargo install --locked stellar-cli --features opt" -ForegroundColor Yellow
-    exit 1
-}
-
-Write-Host "✅ Stellar CLI found" -ForegroundColor Green
-
-# Navigate to contract directory
 Set-Location contract
 
-Write-Host ""
-Write-Host "📦 Building Rust smart contract..." -ForegroundColor Cyan
-
 # Build the contract
-stellar contract build
+Write-Host "Building WASM..." -ForegroundColor Yellow
+cargo build --target wasm32-unknown-unknown --release
 
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Contract built successfully!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "📁 WASM file location:" -ForegroundColor Cyan
-    Write-Host "   target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm" -ForegroundColor White
-    Write-Host ""
-    Write-Host "🔑 Next steps:" -ForegroundColor Yellow
-    Write-Host "   1. Make sure you have a funded Stellar testnet account"
-    Write-Host "   2. Deploy with:" -ForegroundColor Yellow
-    Write-Host "      stellar contract deploy --wasm target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm --source deployer --network testnet" -ForegroundColor White
-    Write-Host ""
-} else {
+if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Build failed!" -ForegroundColor Red
     exit 1
 }
 
+# Optimize the WASM
+Write-Host "⚡ Optimizing WASM..." -ForegroundColor Yellow
+soroban contract optimize `
+    --wasm target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm `
+    --wasm-out target/wasm32-unknown-unknown/release/fairdeal_escrow_optimized.wasm
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Optimization failed!" -ForegroundColor Red
+    exit 1
+}
+
 Set-Location ..
+
+Write-Host "✅ Contract built successfully!" -ForegroundColor Green
+Write-Host "📦 Optimized WASM: contract/target/wasm32-unknown-unknown/release/fairdeal_escrow_optimized.wasm" -ForegroundColor Green

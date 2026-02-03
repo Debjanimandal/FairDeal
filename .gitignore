@@ -8,6 +8,11 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 
+# Next.js
+.next/
+out/
+.vercel/
+
 # Environment Variables
 .env
 .env.local
@@ -21,15 +26,8 @@ dist/
 build/
 *.tgz
 
-# Frontend
-frontend/build/
-frontend/dist/
-frontend/.eslintcache
-
-# Backend
-backend/temp_execution/
-backend/uploads/
-backend/*.log
+# Temporary execution files
+temp_execution/
 
 # Rust/Cargo
 contract/target/
@@ -48,6 +46,16 @@ Thumbs.db
 
 # IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# GitHub
+.github/
+
+# Logs
+*.log
+logs/
 .idea/
 *.swp
 *.swo
