@@ -1,1 +1,1 @@
-E:\FairDeal(stellar)\contract\target\wasm32-unknown-unknown\release\fairdeal_escrow.wasm: E:\FairDeal(stellar)\contract\src\lib.rs
+C:\Users\debja\Desktop\FairDeal(stellar)\contract\target\wasm32-unknown-unknown\release\fairdeal_escrow.wasm: C:\Users\debja\Desktop\FairDeal(stellar)\contract\src\lib.rs
