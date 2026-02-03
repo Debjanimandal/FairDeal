@@ -1,657 +1,665 @@
-# 🚀 FairDeal - Decentralized Freelancing Escrow Platform
+# FairDeal 🤝
 
-[![Stellar](https://img.shields.io/badge/Stellar-Soroban-blue)](https://stellar.org)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react)](https://reactjs.org)
-[![Rust](https://img.shields.io/badge/Rust-Smart%20Contract-orange?logo=rust)](https://www.rust-lang.org)
+## Secure Freelance Payments on the Blockchain
 
-> **A production-ready decentralized escrow platform built on Stellar Soroban that eliminates trust issues in freelancing by securing payments in immutable smart contracts.**
-
-## 📚 Table of Contents
-
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Technical Architecture](#-technical-architecture)
-- [Smart Contract Details](#-smart-contract-details)
-- [Quick Start](#-quick-start)
-- [Project Structure](#-project-structure)
-- [API Documentation](#-api-documentation)
-- [Security Features](#-security-features)
-- [Deployment](#-deployment)
-- [Testing](#-testing)
-- [Future Roadmap](#-future-roadmap)
+**FairDeal** is a decentralized escrow platform built on Stellar blockchain that makes freelance payments safe, transparent, and trustless. No middlemen, no payment disputes, no broken promises.
 
 ---
 
-## 🎯 Overview
+## 🎯 The Problem We Solve
 
-FairDeal revolutionizes the freelancing economy by providing a trustless escrow solution on the Stellar blockchain. It eliminates the need for intermediaries, reduces fees, and ensures both clients and freelancers are protected throughout the transaction lifecycle.
+### Traditional Freelancing Platforms Have Issues:
 
-### The Problem
-Traditional freelancing platforms charge 10-20% fees, hold funds centrally, and can arbitrarily freeze accounts. Disputes often favor one party, and payment delays are common.
+❌ **High Fees** - Platforms take 10-20% commission  
+❌ **Payment Delays** - Funds held for weeks  
+❌ **Trust Issues** - Clients can refuse payment after work is done  
+❌ **Disputes** - Manual resolution that favors platforms, not users  
+❌ **Custody Risk** - Platforms control your money  
+❌ **No Transparency** - Hidden fees and unclear processes  
 
-### Our Solution
-- **Zero Trust Required**: Smart contracts hold funds, not companies
-- **Minimal Fees**: Only blockchain gas fees (~$0.01 per transaction)
-- **Guaranteed Payment**: Freelancers get paid when work is approved
-- **Protected Clients**: Full refunds if work isn't delivered or deadline passes
-- **Transparent**: All transactions verifiable on-chain
-- **IPFS Storage**: Decentralized file storage with encryption and watermarking
+### FairDeal's Solution:
+
+✅ **Zero Platform Fees** - Only blockchain transaction costs (pennies)  
+✅ **Instant Settlements** - Funds released immediately upon approval  
+✅ **Smart Contract Escrow** - Money locked in code, not controlled by admins  
+✅ **Automatic Protection** - Deadline-based refunds built-in  
+✅ **Full Transparency** - Every transaction visible on blockchain  
+✅ **Fraud Prevention** - Immutable on-chain reputation system  
 
 ---
 
-## ✨ Key Features
+## 💡 What is FairDeal?
 
-### 🔐 Smart Contract Escrow
-- Funds locked in Soroban smart contract, impossible to access without both parties' consent
-- No third-party custody - true decentralization
-- Immutable transaction history
+FairDeal is a **trustless freelance marketplace** where:
 
-### 💼 Flexible Payment Options
-- **Partial Payments**: Configurable initial payment (0-100%)
-- **Milestone Support**: Release funds incrementally
-- **Multi-Token**: Works with any Stellar Asset Contract (SAC) token
+- **Clients** post jobs and lock payment in a smart contract
+- **Freelancers** deliver work encrypted and watermarked
+- **Smart contracts** automatically release payment upon approval
+- **Blockchain** ensures transparency and prevents fraud
 
-### 🎨 Work Preview System
-- Watermarked previews for clients to review before approval
-- Original files encrypted with AES-256-CBC
-- Decryption keys revealed only after approval
+**No platform controls your funds. No disputes. Just code.**
 
-### ⏰ Deadline Protection
+---
+
+## 🌟 Key Benefits
+
+### For Clients 👔
+
+- **Pay Only for Completed Work** - Funds locked until you approve
+- **Preview Before Paying** - Review watermarked files before release
+- **Automatic Refunds** - Get money back if deadline is missed
+- **Fraud Protection** - Flag bad actors permanently on-chain
+- **No Platform Fees** - Keep 100% of your budget
+
+### For Freelancers 💼
+
+- **Guaranteed Payment** - Funds locked in escrow before you start
+- **Fast Payouts** - Instant release upon client approval
+- **No Custody Risk** - Platform can't freeze your earnings
+- **Fair Deadlines** - Automatic compensation if client delays
+- **Portable Reputation** - On-chain history follows you everywhere
+
+---
+
+## 🚀 How It Works
+
+### Simple 4-Step Process:
+
+1. **📝 Client Creates Job**
+   - Enter freelancer's wallet address
+   - Lock payment in smart contract (100% in escrow)
+   - Set deadline and job description
+
+2. **💼 Freelancer Delivers**
+   - Upload work files (encrypted automatically)
+   - Client sees watermarked preview
+   - Files stored on decentralized IPFS
+
+3. **👀 Client Reviews**
+   - Preview work with watermarks
+   - Approve to release full payment
+   - Request revision if needed
+   - Raise fraud flag for refund
+
+4. **💰 Automatic Payment**
+   - Smart contract releases funds
+   - No manual processing
+   - Instant settlement
+
+---
+
+## 🔐 Security & Trust Features
+
+### Smart Contract Escrow
+- Funds locked in **Soroban smart contracts** (Stellar blockchain)
+- No human can access or freeze funds
+- Code executes automatically based on job status
+
+### File Protection
+- **AES-256-CBC encryption** for submitted work
+- **Watermarked previews** prevent theft
+- **IPFS storage** for decentralized file hosting
+
+### Fraud Prevention
+- Immutable **on-chain reputation** system
+- Fraud flags permanently recorded
+- Transparent history for all users
+
+### Deadline Protection
 - Automatic refunds if freelancer misses deadline
-- Anyone can trigger refund after deadline (decentralized enforcement)
-- No funds locked forever
-
-### 📦 IPFS Integration
-- Decentralized file storage via web3.storage
-- Permanent availability
-- Content-addressed for verification
-
-### 🔑 Wallet Authentication
-- Freighter wallet integration
-- No username/password needed
-- True Web3 experience
-
----
-
-## 🏛️ Technical Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend (React)                      │
-│  • Wallet Connection (Freighter)                            │
-│  • Job Creation/Management UI                               │
-│  • File Upload/Preview                                      │
-└────────────┬────────────────────────────────────────────────┘
-             │
-             ├──────────────────┬──────────────────────────────┐
-             │                  │                              │
-┌────────────▼─────────┐  ┌─────▼──────────┐  ┌──────────────▼────────┐
-│  Backend (Node.js)   │  │ Stellar Network │  │  IPFS (web3.storage) │
-│  • File Encryption   │  │ • Smart Contract│  │  • File Storage       │
-│  • Watermarking      │  │ • Transactions  │  │  • Content Addressing │
-│  • IPFS Upload       │  │ • Escrow Logic  │  │  • Decentralization   │
-└──────────────────────┘  └─────────────────┘  └───────────────────────┘
-```
-
-### Technology Stack
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Smart Contract** | Rust + Soroban SDK | Escrow logic, fund management |
-| **Backend** | Node.js + Express | File handling, encryption, IPFS |
-| **Frontend** | React + TypeScript | User interface, wallet integration |
-| **Blockchain** | Stellar (Soroban) | Transaction settlement, token transfers |
-| **Storage** | IPFS (web3.storage) | Decentralized file storage |
-| **Encryption** | AES-256-CBC | File security |
-| **Authentication** | Freighter Wallet | Web3 wallet auth |
-
----
-
-## 📜 Smart Contract Details
-
-### Contract Functions
-
-#### Core Operations
-```rust
-create_job(client, freelancer, amount, initial_payment_percent, deadline, description, token) -> u64
-fund_job(job_id, funder) -> Result<(), Error>
-submit_work(job_id, submitter, work_cid, preview_cid) -> Result<(), Error>
-approve_work(job_id, approver) -> Result<(), Error>
-reject_work(job_id, rejector) -> Result<(), Error>
-trigger_refund(job_id, caller) -> Result<(), Error>
-release_initial_payment(job_id, caller) -> Result<(), Error>
-```
-
-#### Query Functions
-```rust
-get_job(job_id) -> Job
-get_jobs_by_client(client) -> Vec<u64>
-get_jobs_by_freelancer(freelancer) -> Vec<u64>
-get_job_count() -> u64
-```
-
-### Job States
-
-| State | Code | Description |
-|-------|------|-------------|
-| `CREATED` | 0 | Job created, awaiting funding |
-| `FUNDED` | 1 | Funds locked in escrow |
-| `SUBMITTED` | 2 | Work submitted, awaiting review |
-| `APPROVED` | 3 | Work approved, payment released |
-| `REJECTED` | 4 | Work rejected, refund issued |
-| `CANCELLED` | 5 | Job cancelled before funding |
-
-### State Machine
-```
-CREATE → FUND → SUBMIT → [INITIAL_PAYMENT] → APPROVE → COMPLETE
-                    ↓                              ↓
-                    └──────── REJECT ─────────────┘
-                    ↓
-                DEADLINE_EXPIRED → REFUND
-```
-
----
+- Emergency release if client doesn't respond
+- Fair dispute resolution built into smart contract
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
 ```bash
-# Required
-Node.js 16+          # Backend & Frontend runtime
-npm or yarn          # Package manager
-Rust & Cargo         # Smart contract compilation
-Stellar CLI          # Contract deployment
-
-# Wallets
-Freighter Wallet     # Browser extension for Stellar
-
-# API Keys
-web3.storage token   # Free at https://web3.storage
-```
-
-### Installation
-
-```
-
-#### 2. Backend Setup
-```bash
-cd backend
+# Install dependencies
 npm install
 
-# Create environment file
-cp .env.example .env
+# Run the application
+npm run dev
 
-# Edit .env and add your web3.storage API token
-# Get free token at: https://web3.storage
+# Open browser
+http://localhost:3000
 ```
 
-**.env configuration:**
-```env
-PORT=5000
-WEB3_STORAGE_TOKEN=your_token_here
-STELLAR_NETWORK=testnet
-SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-STELLAR_CONTRACT_ID=your_deployed_contract_id
-```
-
-```bash
-# Start backend server
-node index.js
-# Server runs on http://localhost:5000
-```
-
-#### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-
-# Start development server
-npm start
-# Opens on http://localhost:3000
-```
-
-#### 4. Smart Contract Build
-```bash
-cd contract
-
-# Build contract
-stellar contract build
-# or
-cargo build --target wasm32-unknown-unknown --release
-
-# Run tests
-cargo test
-```
+That's it! Everything (frontend + backend) runs on port 3000.
 
 ---
 
-## 📂 Project Structure
+---
+
+## ⚡ Live Demo
+
+**🌐 Try it now:** [FairDeal on Vercel](https://fair-deal.vercel.app)
+
+**📊 Smart Contract:** `CBONHPWFT7D2USWDGC5G55LJNBCRRTN4YQE6O6CFJA3RROIQ4UIWUFDM` (Stellar Testnet)
+
+---
+
+## 🛠️ Tech Stack
+
+Built with cutting-edge blockchain and web technologies:
+
+- **Blockchain:** Stellar (Soroban Smart Contracts in Rust)
+- **Frontend:** Next.js 14, TypeScript, React
+- **Wallet:** Freighter Wallet Integration
+- **Storage:** IPFS (Pinata) for decentralized file hosting
+- **Encryption:** AES-256-CBC for file security
+- **Network:** Currently on Stellar Testnet (Production ready for Mainnet)
+
+---
+
+## 📋 Complete Feature List
+
+### 🔐 Trustless Escrow System
+- Full amount locked in Soroban smart contract (not backend server)
+- Automatic fund release via blockchain logic
+- No custody risk - backend cannot access funds
+- Deadline enforcement by smart contract code
+
+### 💼 Job Management
+- Create jobs with freelancer wallet address
+- Set custom deadlines (1-30 days)
+- Track job status in real-time
+- View all jobs in dashboard (Client & Freelancer views)
+
+### 📁 File Handling
+- Upload up to 50 files (50MB total)
+- Automatic AES-256-CBC encryption
+- Watermarked preview generation
+- IPFS decentralized storage
+- Secure download after approval
+
+### 🎨 Preview System
+- Watermarked images for client review
+- Code execution sandbox (Node.js, Python, Java, HTML)
+- Preview before final payment
+- Protects freelancer's intellectual property
+
+### ⚖️ Dispute Resolution
+- Approve & release payment
+- Request revisions
+- Raise fraud flags with automatic refund
+- Immutable on-chain fraud tracking
+
+### 🌐 Decentralized Architecture
+- IPFS for persistent file storage
+- Blockchain for payment transparency
+- No single point of failure
+- Censorship-resistant
+
+---
+
+## 🛠️ Setup
+
+### 1. Environment Variables
+
+Create `.env.local` file in the root directory:
+
+```env
+# Stellar Configuration
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
+NEXT_PUBLIC_CONTRACT_ID=your_contract_id_here
+
+# Escrow Configuration (Server-side only)
+ESCROW_SECRET_KEY=your_escrow_secret_key
+ESCROW_PUBLIC_KEY=your_escrow_public_key
+
+# Pinata/IPFS Configuration (Server-side only)
+PINATA_API_KEY=your_pinata_api_key
+PINATA_SECRET_API_KEY=your_pinata_secret_api_key
+
+# Optional: Restore from IPFS on startup
+RESTORE_FROM_IPFS_CID=your_ipfs_cid_here
+```
+
+### 2. Install Freighter Wallet
+
+- Install Freighter browser extension
+- Create or import testnet account
+- Get testnet XLM from friendbot: https://laboratory.stellar.org/#account-creator?network=test
+
+### 3. Run the Application
+
+```bash
+npm install
+npm run dev
+```
+
+### 4. Build & Deploy Smart Contract (Optional - for production)
+
+**Prerequisites:**
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add wasm32-unknown-unknown
+
+# Install Soroban CLI
+cargo install --locked soroban-cli
+```
+
+**Build:**
+```bash
+# Windows
+.\build-contract.ps1
+
+# Linux/Mac
+./build-contract.sh
+```
+
+**Deploy to Testnet:**
+```bash
+# Windows
+.\deploy-contract.ps1
+
+# Linux/Mac
+./deploy-contract.sh
+```
+
+See [CONTRACT_GUIDE.md](CONTRACT_GUIDE.md) for detailed smart contract documentation.
+
+---
+
+## 📁 Project Structure
 
 ```
 FairDeal/
-├── contract/                    # Soroban Smart Contract (Rust)
+├── app/                        # Next.js App Router
+│   ├── api/                    # Backend API routes
+│   │   ├── jobs/               # Job management endpoints
+│   │   ├── escrow-address/     # Escrow public key
+│   │   ├── freelancers/        # Fraud flags
+│   │   ├── decrypt-file/       # File decryption
+│   │   ├── ipfs/               # IPFS CID tracking
+│   │   └── health/             # Health check
+│   ├── page.tsx                # Landing + Dashboard
+│   ├── login/                  # Wallet connection
+│   ├── create-job/             # Job creation
+│   ├── jobs/[jobId]/           # Job detail
+│   └── submit-work/[jobId]/    # Work submission
+├── components/                 # React components
+│   ├── WalletProvider.tsx      # Wallet context
+│   └── Navigation.tsx          # Navigation bar
+├── lib/                        # Server-side utilities
+│   ├── storage.ts              # File-based persistence
+│   ├── stellar-utils.ts        # Stellar blockchain
+│   ├── ipfs-utils.ts           # IPFS & watermarking
+│   └── code-execution.ts       # Code sandbox
+├── utils/                      # Client-side utilities
+│   └── stellar-utils.ts        # Client Stellar ops
+├── config/                     # Configuration
+│   └── api.ts                  # API endpoints config
+├── contract/                   # Soroban Smart Contract (Rust)
 │   ├── src/
-│   │   ├── lib.rs              # Main contract logic (381 lines)
-│   │   └── test.rs             # Comprehensive tests
-│   ├── Cargo.toml              # Rust dependencies
-│   └── target/                 # Build artifacts
-│
-├── backend/                     # Node.js + Express API
-│   ├── index.js                # All endpoints (436 lines)
-│   ├── package.json            # Dependencies
-│   ├── .env.example            # Environment template
-│   └── temp_execution/         # Temporary file storage
-│
-├── frontend/                    # React Application
-│   ├── src/
-│   │   ├── App.tsx             # Main app component
-│   │   ├── App.css             # Styling
-│   │   ├── index.tsx           # Entry point
-│   │   ├── components/
-│   │   │   └── WalletConnect.tsx    # Wallet integration
-│   │   ├── pages/
-│   │   │   ├── LandingPage.tsx      # Home page
-│   │   │   ├── Dashboard.tsx        # Job dashboard
-│   │   │   ├── CreateJob.tsx        # Job creation form
-│   │   │   ├── JobDetail.tsx        # Job management
-│   │   │   └── SubmitWork.tsx       # Work submission
-│   │   └── utils/
-│   │       └── stellar-utils.ts     # Contract interactions
-│   ├── public/
-│   │   └── index.html
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── .gitignore                   # Git ignore rules
-└── README.md                    # This file
+│   │   ├── lib.rs              # Main contract logic
+│   │   └── test.rs             # Contract tests
+│   └── Cargo.toml              # Rust dependencies
+├── data/                       # Persistent storage
+│   ├── jobs.json               # Job database
+│   ├── files.json              # File metadata
+│   ├── fraud.json              # Fraud flags
+│   └── ipfs-cid.json           # Latest IPFS CID
+├── build-contract.ps1          # Build script (Windows)
+├── build-contract.sh           # Build script (Linux/Mac)
+├── deploy-contract.ps1         # Deploy script (Windows)
+├── deploy-contract.sh          # Deploy script (Linux/Mac)
+├── CONTRACT_GUIDE.md           # Smart contract documentation
+├── instrumentation.ts          # Server startup logic
+├── next.config.js              # Next.js configuration
+├── tsconfig.json               # TypeScript config
+├── .env.local                  # Environment variables
+└── package.json                # Dependencies
 ```
 
 ---
 
-## 🔄 Complete User Flow
+## 🔗 API Endpoints
 
-### 1. Job Creation (Client)
-```
-1. Connect Freighter wallet
-2. Navigate to "Create Job"
-3. Enter:
-   - Freelancer's Stellar address
-   - Payment amount
-   - Initial payment % (optional)
+All backend APIs are available at `http://localhost:3000/api/*`
+
+### Job Management
+- `POST /api/jobs` - Create new job
+- `GET /api/jobs` - List all jobs
+- `GET /api/jobs/:jobId` - Get job details
+- `GET /api/jobs/:jobId/status` - Get job status
+
+### Work Submission & Preview
+- `POST /api/jobs/submit-work` - Submit work files
+- `GET /api/jobs/:jobId/preview` - Get preview status
+- `GET /api/jobs/:jobId/preview-content` - View watermarked preview
+- `GET /api/jobs/:jobId/download` - Download original files (approved only)
+
+### Job Actions
+- `POST /api/jobs/:jobId/release-initial-payment` - Mark initial payment released
+- `POST /api/jobs/:jobId/approve` - Approve work & release funds
+- `POST /api/jobs/:jobId/reject` - Reject work or request revision
+- `POST /api/jobs/:jobId/raise-fraud-flag` - Raise fraud flag & refund
+
+### Utilities
+- `GET /api/escrow-address` - Get escrow public key
+- `GET /api/freelancers/:address/fraud-flags` - Get fraud history
+- `POST /api/decrypt-file` - Decrypt file
+- `GET /api/ipfs/latest-cid` - Get latest IPFS CID
+- `GET /api/health` - Health check
+
+---
+
+## 💰 How It Works
+
+### 1. Client Creates Job
+1. Connect wallet (Freighter)
+2. Select "Client" role
+3. Fill job details:
+   - Freelancer address
+   - Amount in XLM
+   - Initial payment % (10/20/30/50%)
    - Deadline
-   - Job description
-4. Click "Create & Fund Job"
-5. Smart contract locks funds in escrow ✅
-```
+   - Description
+4. Two payments executed:
+   - Initial % → Freelancer
+   - Remaining % → Escrow
 
-### 2. Work Submission (Freelancer)
-```
-1. Connect wallet (freelancer address)
-2. View assigned jobs
-3. Click "Submit Work"
-4. Upload deliverable file
-5. Backend automatically:
-   - Generates AES-256 encryption key
-   - Encrypts original file
-   - Creates watermarked preview
-   - Uploads both to IPFS
-6. Submission recorded on-chain ✅
-```
+### 2. Freelancer Submits Work
+1. Connect wallet
+2. Select "Freelancer" role
+3. View assigned jobs
+4. Upload work files (up to 50 files, 50MB)
+5. Files automatically:
+   - Encrypted with AES-256-CBC
+   - Watermarked for preview
+   - Uploaded to IPFS
 
-### 3. Work Review (Client)
-```
-1. View submitted job
-2. Click "View Preview"
-3. Review watermarked version from IPFS
-4. Decision:
-   
-   ✅ APPROVE:
-   - Click "Approve & Release Funds"
-   - Smart contract releases payment to freelancer
-   - Backend reveals original file CID + decryption key
-   
-   ❌ REJECT:
-   - Click "Reject & Refund"
-   - Smart contract refunds client
-   - Original file never revealed
-```
+### 3. Client Reviews Work
+1. View watermarked preview
+2. For code projects: See execution results
+3. Three options:
+   - **Approve & Pay** - Release remaining funds
+   - **Request Revision** - Allow resubmission
+   - **Raise Fraud Flag** - Terminate & refund
 
-### 4. Deadline Enforcement
-```
-If freelancer misses deadline:
-- Anyone can trigger refund
-- Funds automatically returned to client
-- No manual intervention needed
-```
-
----
-
-## 🛠️ API Documentation
-
-### Backend Endpoints
-
-| Method | Endpoint | Description | Authentication |
-|--------|----------|-------------|----------------|
-| `POST` | `/api/jobs/submit-work` | Upload and encrypt work file | None |
-| `GET` | `/api/jobs/:jobId/preview` | Get preview IPFS CID | None |
-| `POST` | `/api/jobs/:jobId/approve` | Approve work, reveal original | None |
-| `POST` | `/api/jobs/:jobId/reject` | Reject work | None |
-| `GET` | `/api/jobs/:jobId/status` | Check job submission status | None |
-| `GET` | `/api/jobs` | List all jobs (debug) | None |
-
-#### Submit Work Example
-```bash
-curl -X POST http://localhost:5000/api/jobs/submit-work \
-  -F "jobId=1" \
-  -F "file=@work.pdf"
-
-# Response
-{
-  "success": true,
-  "previewCid": "bafybei...",
-  "message": "Work submitted successfully"
-}
-```
-
-#### Approve Work Example
-```bash
-curl -X POST http://localhost:5000/api/jobs/1/approve
-
-# Response
-{
-  "success": true,
-  "originalCid": "bafybei...",
-  "decryptionKey": "a1b2c3...",
-  "iv": "d4e5f6..."
-}
-```
+### 4. Fraud Protection
+- Clients can raise fraud flags
+- Fraud history tracked by freelancer address
+- Automatic refund on fraud flag
+- Job immediately terminated
 
 ---
 
 ## 🔐 Security Features
 
-### 🛡️ Smart Contract Security
-- **Authorization Checks**: Only authorized addresses can perform actions
-- **State Machine Validation**: Prevents invalid state transitions
-- **Reentrancy Protection**: Built into Soroban runtime
-- **Overflow Protection**: Rust's safe arithmetic
-- **Deadline Enforcement**: Automatic refunds prevent locked funds
+### Encryption
+- **AES-256-CBC** encryption for all submitted files
+- Random 32-byte keys per file
+- Random 16-byte IVs per file
+- Keys stored encrypted in file metadata
 
-### 🔒 File Security
-- **Encryption**: AES-256-CBC for original files
-- **Watermarking**: JIMP-based image watermarking for previews
-- **Key Management**: Server-side key generation and storage
-- **Selective Revelation**: Keys only revealed after approval
+### Watermarking
+- "PREVIEW ONLY" text overlay on images
+- Opacity reduction for visual indication
+- Protects client's intellectual property
 
-### 👛 Wallet Security
-- **Non-Custodial**: Users control private keys
-- **Transaction Signing**: All actions require wallet signature
-- **Public Key Auth**: No passwords to leak
-- **Testnet Safe**: All testing on Stellar testnet
+### Code Execution Sandbox
+- Isolated temporary directories
+- 30-second execution timeout
+- Automatic cleanup after execution
+- Supports: Node.js, Python, Java, HTML
+
+### Stellar Testnet
+- All transactions on testnet
+- Escrow account management
+- Transaction memos for tracking
+
+---
+
+## 📊 Job States
+
+| State | Description | Client Actions | Freelancer Actions |
+|-------|-------------|----------------|-------------------|
+| 0 | Created | Wait | Upload Work |
+| 1 | Work Submitted | Approve/Reject/Fraud | Wait |
+| 2 | Approved | Download Files | - |
+| 3 | Rejected/Refunded | - | - |
+| 4 | Revision Requested | Wait | Re-upload Work |
 
 ---
 
 ## 🧪 Testing
 
-### Smart Contract Tests
-```bash
-cd contract
-cargo test
+### Example Test Flow
 
-# Run specific test
-cargo test test_complete_job_flow
-
-# Run with output
-cargo test -- --nocapture
+1. **Create Test Job** (as Client)
+```
+Freelancer: GBT2EHJKQAWW46QRJUY343YGEJDEPIU3U77S2R7ZXLP4NYQFUTGY3PRP
+Amount: 10 XLM
+Initial Payment: 20% (2 XLM)
+Deadline: 7 days
+Description: "Create a calculator app"
 ```
 
-### Manual Testing Workflow
-1. **Setup**: Install Freighter wallet, get testnet XLM
-2. **Create Job**: Use frontend to create escrow job
-3. **Submit Work**: Upload test file as freelancer
-4. **Preview**: View watermarked version on IPFS
-5. **Approve**: Verify funds released and keys revealed
-6. **Reject Flow**: Test refund mechanism
-7. **Deadline**: Test automatic refund after timeout
+2. **Submit Work** (as Freelancer)
+- Upload HTML/JS calculator files
+- Preview shows watermarked version
+- Code execution displays calculator
+
+3. **Review & Approve** (as Client)
+- View preview
+- Test "Approve & Pay" (8 XLM released)
+- Verify transaction on Stellar testnet
 
 ---
 
-## 📦 Deployment
+## 🐛 Troubleshooting
 
-### Smart Contract Deployment
-
-#### Testnet Deployment
+### Server won't start
 ```bash
-cd contract
+# Delete .next cache
+rm -rf .next
 
-# Build optimized WASM
-stellar contract build
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
 
-# Deploy to testnet
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm \
-  --source deployer \
-  --network testnet
-
-# Output: CONTRACT_ID (save this!)
+# Try again
+npm run dev
 ```
 
-#### Mainnet Deployment
-```bash
-# Deploy to mainnet (requires real XLM)
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm \
-  --source deployer \
-  --network mainnet
-```
+### Jobs not showing up
+- Check `data/jobs.json` exists
+- Check console for errors
+- Verify wallet connection
 
-### Backend Deployment (Example: Heroku)
-```bash
-cd backend
+### File upload fails
+- Check file size (max 50MB)
+- Check file count (max 50 files)
+- Verify PINATA keys in `.env.local`
 
-# Create Procfile
-echo "web: node index.js" > Procfile
-
-# Deploy
-heroku create fairdeal-backend
-heroku config:set WEB3_STORAGE_TOKEN=your_token
-heroku config:set STELLAR_CONTRACT_ID=your_contract_id
-git push heroku main
-```
-
-### Frontend Deployment (Example: Vercel)
-```bash
-cd frontend
-
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
+### Stellar transaction fails
+- Verify wallet has enough XLM
+- Check testnet friendbot if needed
+- Verify ESCROW_PUBLIC_KEY is correct
 
 ---
 
-## 🎯 What Makes This Project Stand Out
+## 🚢 Deployment
 
-### ✅ Complete Implementation
-- **Not a Prototype**: Fully functional end-to-end system
-- **Production-Ready Code**: Proper error handling, validation, tests
-- **Real-World Applicability**: Solves genuine freelancing pain points
+### Deploy to Vercel (Recommended)
 
-### 🏆 Technical Excellence
-- **Smart Contract**: 381 lines of production Rust with comprehensive tests
-- **Backend**: 436 lines handling encryption, IPFS, watermarking
-- **Frontend**: Complete React app with wallet integration
-- **Security**: Multi-layer protection (contract, encryption, wallet auth)
+1. **Push to GitHub**
+   ```bash
+   git push origin main
+   ```
 
-### 💡 Innovation
-- **Trustless Escrow**: No central authority needed
-- **Preview System**: Watermarked previews protect both parties
-- **Deadline Automation**: Decentralized refund enforcement
-- **IPFS Integration**: Permanent, censorship-resistant storage
+2. **Import to Vercel**
+   - Visit [vercel.com](https://vercel.com)
+   - Click "Import Project"
+   - Select your GitHub repository
+   - Vercel auto-detects Next.js configuration
 
-### 🌍 Real Impact
-- **Reduces Fees**: From 10-20% to ~$0.01 per transaction
-- **Global Access**: Anyone with a Stellar wallet can participate
-- **Fair Transactions**: Protects both clients and freelancers
-- **Transparency**: All actions verifiable on-chain
+3. **Add Environment Variables**
+   
+   In Vercel dashboard, add these variables:
+   ```
+   NEXT_PUBLIC_STELLAR_NETWORK=testnet
+   NEXT_PUBLIC_CONTRACT_ID=your_contract_id
+   ESCROW_SECRET_KEY=your_escrow_secret
+   ESCROW_PUBLIC_KEY=your_escrow_public
+   PINATA_API_KEY=your_pinata_key
+   PINATA_SECRET_API_KEY=your_pinata_secret
+   ```
+
+4. **Deploy!**
+   - Click "Deploy"
+   - Your app will be live at `your-app.vercel.app`
+
+### Other Platforms
+
+FairDeal can be deployed on any platform that supports Next.js 14:
+- Netlify
+- Railway
+- AWS Amplify
+- Self-hosted VPS
 
 ---
 
-## 🚀 Future Roadmap
+## 🎓 Use Cases
 
-### Phase 1: MVP Enhancement (Current)
-- [x] Smart contract escrow
-- [x] File encryption & watermarking
-- [x] IPFS storage
-- [x] Wallet authentication
+### Freelance Development
+Hire developers for web apps, mobile apps, or smart contracts with guaranteed payment
 
-### Phase 2: Production Features
-- [ ] Database integration (PostgreSQL)
-- [ ] User profiles & reputation system
-- [ ] Multi-milestone jobs
-- [ ] Dispute resolution mechanism
-- [ ] Email notifications
+### Design Work
+Commission logos, websites, or marketing materials with preview-before-pay
 
-### Phase 3: Advanced Features
-- [ ] AI-powered work verification
-- [ ] Automated invoice generation
-- [ ] Multi-currency support
-- [ ] Mobile app (React Native)
-- [ ] DAO governance
+### Content Creation
+Pay writers, video editors, or content creators securely
 
-### Phase 4: Scale & Optimize
-- [ ] Layer 2 scaling solution
-- [ ] Advanced analytics dashboard
-- [ ] API for third-party integrations
-- [ ] White-label solutions
+### Consulting Services
+Lock payment for hourly consulting with milestone-based releases
+
+### Any Remote Work
+Any job that can be delivered digitally works on FairDeal
+
+---
+
+## 🌍 Why Blockchain Matters
+
+### Traditional Escrow Problems:
+- Platforms charge 10-20% fees
+- Manual dispute resolution (slow & biased)
+- Platform can freeze or confiscate funds
+- Requires trust in centralized company
+
+### Smart Contract Benefits:
+- Near-zero transaction fees (~$0.00001 per transaction)
+- Instant automatic execution
+- Mathematically provable fairness
+- Trustless - no intermediary needed
+- Censorship-resistant
+- Works globally without restrictions
+
+---
+
+## 📊 Comparison
+
+| Feature | FairDeal | Upwork | Fiverr | Freelancer.com |
+|---------|----------|--------|--------|----------------|
+| **Platform Fee** | ~$0.00001 | 10-20% | 20% | 10% |
+| **Payment Speed** | Instant | 5-10 days | 14 days | 7 days |
+| **Escrow** | Smart Contract | Platform | Platform | Platform |
+| **Transparency** | Full (Blockchain) | Limited | Limited | Limited |
+| **Dispute** | Automatic | Manual | Manual | Manual |
+| **Custody** | Trustless | Platform owns | Platform owns | Platform owns |
+| **Fraud Protection** | On-chain permanent | Platform decision | Platform decision | Platform decision |
+| **Global Access** | ✅ | ⚠️ Restricted | ⚠️ Restricted | ⚠️ Restricted |
+
+---
+
+## 🐛 Troubleshooting
+
+### Wallet Connection Issues
+- Ensure Freighter extension is installed
+- Check you're on the correct network (Testnet)
+- Refresh the page and try again
+
+### Transaction Fails
+- Verify you have enough XLM in your wallet
+- Get free testnet XLM: [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)
+- Check if the contract ID is correct
+
+### File Upload Fails
+- Check file size (max 50MB total)
+- Verify Pinata credentials in environment variables
+- Try uploading fewer files
+
+### Job Not Showing
+- Check browser console for errors (F12)
+- Verify you're connected with correct wallet address
+- Clear cache and reload
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Areas for improvement:
-- Additional payment token support
-- Enhanced watermarking algorithms
-- Mobile-responsive UI improvements
-- Internationalization (i18n)
-- Documentation translations
+We welcome contributions! Here's how you can help:
+
+1. **Report Bugs** - Open an issue on GitHub
+2. **Suggest Features** - Share your ideas
+3. **Submit PRs** - Fix bugs or add features
+4. **Improve Docs** - Help others understand FairDeal
+5. **Spread the Word** - Tell other freelancers!
 
 ---
 
 ## 📄 License
 
-MIT License - feel free to use this project for learning or building your own applications.
-
----
-
-## 👥 Team
-
-Built by **Debjani Mandal** for the Stellar Hackathon
-
----
-
-## 📞 Contact & Links
-
-- **GitHub**: [github.com/Debjanimandal/FairDeal](https://github.com/Debjanimandal/FairDeal)
-- **Demo Video**: [Coming Soon]
-- **Live Demo**: [Coming Soon]
+MIT License - Free to use, modify, and distribute
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Stellar Foundation** - For Soroban smart contract platform
-- **web3.storage** - For decentralized storage infrastructure
-- **Freighter Wallet** - For seamless wallet integration
+Built with ❤️ on **Stellar Blockchain**
+
+Special thanks to:
+- Stellar Development Foundation
+- Soroban Smart Contracts team
+- Freighter Wallet team
+- IPFS/Pinata community
 
 ---
 
-<div align="center">
+## 📧 Support & Community
 
-**⭐ Star this repo if you find it useful! ⭐**
-
-Made with ❤️ for the Stellar ecosystem
-
-</div
-
-# Deploy to Stellar testnet
-soroban contract deploy \
-  --network testnet \
-  --source <your-account> \
-  --wasm contract/target/wasm32-unknown-unknown/release/fairdeal_escrow.wasm
-```
-
-### Backend (Heroku)
-```bash
-heroku create fairdeal-backend
-git push heroku main
-heroku config:set WEB3_STORAGE_TOKEN=your_token
-```
-
-### Frontend (Vercel)
-```bash
-npm install -g vercel
-vercel deploy frontend
-```
-
-## 🐛 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Wallet won't connect | Install Freighter, unlock wallet, refresh page |
-| CORS errors | Ensure backend running on port 5000 |
-| File upload fails | Check web3.storage token is valid |
-| Preview not loading | Verify CID in browser console, check IPFS gateway |
-| Contract errors | Make sure testnet RPC URL is correct |
-
-## 📖 Full Documentation
-
-Open [README.html](./README.html) in browser for complete architecture guide, flow diagrams, and deployment instructions.
-
-## 💡 Key Insights for Judges
-
-**Innovation:**
-- Cryptographic file protection without server custody
-- Smart contract-enforced escrow (immutable, trustless)
-- Watermarking prevents unauthorized sharing
-
-**Practicality:**
-- Works today on Stellar testnet
-- No payment processor needed (blockchain handles it)
-- IPFS ensures censorship-resistant storage
-
-**Code Quality:**
-- Well-structured MVP
-- Clear separation of concerns
-- Production-ready patterns
-
-## 🎓 Learning Resources
-
-- [Stellar Docs](https://stellar.org/developers)
-- [Soroban SDK](https://soroban.stellar.org/)
-- [web3.storage](https://web3.storage/)
-- [Freighter Docs](https://freighter.app/)
-
-## ⚡ Next Steps After Hackathon
-
-1. Add persistent database (PostgreSQL)
-2. Implement real USDC token transfers
-3. Add dispute resolution with arbitrators
-4. Reputation/rating system
-5. Mobile app (React Native)
-6. Advanced encryption schemes
-7. Multi-milestone support
-8. NFT certificates on completion
-
-## 📝 License
-
-MIT - Use freely!
+- **Issues:** [GitHub Issues](https://github.com/Debjanimandal/FairDeal/issues)
+- **Documentation:** See `/CONTRACT_GUIDE.md` for smart contract details
+- **Stellar Network:** [stellar.org](https://stellar.org)
 
 ---
 
-**Built for 24-hour Stellar Hackathon** ⚡  
-**Questions?** Check [README.html](./README.html) or ask in hackathon Discord
+## 🎉 Get Started Today!
+
+Ready to experience trustless freelancing?
+
+1. Install [Freighter Wallet](https://www.freighter.app/)
+2. Get testnet XLM from [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)
+3. Visit [FairDeal](https://fair-deal.vercel.app)
+4. Create your first job or find work!
+
+**The future of freelancing is decentralized. Welcome to FairDeal.** 🚀
+
+---
+
+## 🔧 For Developers
+
+### Smart Contract Architecture
+The app uses a **hybrid approach**:
+- **Smart Contract**: Escrow logic, fund custody, deadline enforcement
+- **Backend**: IPFS uploads, file encryption, preview generation, metadata
+
+### Why This Design?
+- **Smart Contract**: Trustless, automatic, transparent, secure
+- **Backend**: Handles heavy off-chain operations (file processing, watermarking)
+
+### Learn More
+See [CONTRACT_GUIDE.md](CONTRACT_GUIDE.md) for detailed smart contract documentation and integration instructions.
+
