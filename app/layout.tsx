@@ -18,8 +18,6 @@ export default function RootLayout({
       <body>
         <WalletProvider>
           <div className="App">
-            <div className="bg-blob blob-1"></div>
-            <div className="bg-blob blob-2"></div>
             <Navigation />
             {children}
           </div>

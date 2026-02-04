@@ -2,152 +2,150 @@
 
 import { useWallet } from '@/components/WalletProvider';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Threads component (client-side only)
+const Threads = dynamic(() => import('@/components/Threads'), { ssr: false });
+const Sparkles = dynamic(() => import('@/components/Sparkles'), { ssr: false });
 
 export default function HomePage() {
   const { wallet, userRole } = useWallet();
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('all');
-
-  useEffect(() => {
-    if (wallet) {
-      fetchJobs();
-    } else {
-      setLoading(false);
-    }
-  }, [wallet]);
-
-  // Refetch jobs when page comes into focus
-  useEffect(() => {
-    const handleFocus = () => {
-      if (wallet) {
-        fetchJobs();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [wallet]);
-
-  const fetchJobs = async () => {
-    try {
-      const response = await axios.get('/api/jobs');
-      
-      if (response.data.success) {
-        setJobs(response.data.jobs);
-      } else {
-        setJobs([]);
-      }
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusClass = (state: number) => {
-    const states: { [key: number]: string } = {
-      0: 'status-created',
-      1: 'status-submitted',
-      2: 'status-approved',
-      3: 'status-rejected',
-      4: 'status-refunded',
-    };
-    return states[state] || 'status-created';
-  };
-
-  const getStatusLabel = (state: number) => {
-    const labels: { [key: number]: string } = {
-      0: 'Created',
-      1: 'Submitted',
-      2: 'Approved',
-      3: 'Rejected',
-      4: 'Refunded',
-    };
-    return labels[state] || 'Unknown';
-  };
-
-  const filteredJobs = jobs.filter((job: any) => {
-    // Filter by wallet address - show jobs where user is client OR freelancer
-    const isMyJob = job.client === wallet || job.freelancer === wallet;
-
-    if (!isMyJob) return false;
-
-    // Then apply status filter
-    if (filter === 'created') return job.state === 0;
-    if (filter === 'submitted') return job.state === 1;
-    return true;
-  });
 
   if (!wallet) {
     // Landing Page
     return (
-      <div className="landing-page" style={{ position: 'relative', overflow: 'hidden' }}>
-        <section style={{ padding: "10rem 1.5rem 8rem", textAlign: "center", position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-            <div className="animate-fade-in" style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1.5rem",
-              borderRadius: "99px",
-              background: "rgba(0, 114, 255, 0.1)",
-              border: "1px solid rgba(0, 114, 255, 0.2)",
-              color: "#00C6FF",
-              fontWeight: "600",
-              fontSize: "0.9rem",
-              marginBottom: "2rem"
-            }}>
-              <span style={{ position: 'relative', display: 'flex', height: '10px', width: '10px' }}>
-                <span className="pulse-ring"></span>
-                <span className="pulse-dot"></span>
-              </span>
-              Live on Stellar Testnet
-            </div>
+      <div className="landing-page" style={{
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, #000000 0%, #0A0E27 40%, #0D1B3E 100%)'
+      }}>
+        {/* Full Width Glowing Wave - Left to Right */}
+        <div style={{
+          position: 'absolute',
+          top: '-5%',
+          left: 0,
+          right: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.3))',
+          opacity: 0.8
+        }}>
+          <Threads
+            color={[1, 1, 1]}
+            amplitude={1.5}
+            distance={0}
+            enableMouseInteraction={true}
+          />
+        </div>
 
-            <h1 className="hero-title animate-fade-in delay-100">
+        {/* Rising Sparkles Effect */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+          <Sparkles />
+        </div>
+
+        <section style={{ padding: "6rem 1.5rem 8rem", textAlign: "center", position: 'relative', zIndex: 1 }}>
+          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+
+            <h1 className="hero-title animate-fade-in delay-100" style={{
+              fontSize: "4rem",
+              fontWeight: "700",
+              lineHeight: "1.1",
+              marginBottom: "2rem",
+              letterSpacing: "-0.03em",
+              color: "#FFFFFF"
+            }}>
               The Trustless Way to <br />
-              <span className="text-gradient-primary">Hire</span> & <span className="text-gradient-accent">Work.</span>
+              <span className="text-gradient-primary">Hire</span> & <span className="text-gradient-primary">Work</span>
             </h1>
 
-            <p className="animate-fade-in delay-200" style={{
-              fontSize: "1.35rem",
-              color: "var(--text-muted)",
-              maxWidth: "650px",
-              margin: "0 auto 3.5rem",
-              lineHeight: "1.6"
-            }}>
-              FairDeal replaces middleman fees with smart contracts.
-              Secure escrow, instant settlement, and verifiable reputation for the gig economy.
-            </p>
-
-            <div className="animate-fade-in delay-300" style={{ display: "flex", gap: "1.5rem", justifyContent: "center" }}>
-              <Link href="/login" className="btn btn-primary" style={{ padding: "1rem 3rem", fontSize: "1.1rem" }}>
+            <div className="animate-fade-in delay-300" style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", marginTop: "8rem" }}>
+              <Link
+                href="/login"
+                className="btn"
+                style={{
+                  padding: "0.8rem 2.5rem",
+                  fontSize: "1rem",
+                  background: "#FFFFFF",
+                  color: "#000000",
+                  borderRadius: "12px",
+                  fontWeight: "600",
+                  border: "none",
+                  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.15)",
+                  transition: "all 0.3s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 8px 30px rgba(255, 255, 255, 0.25)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 20px rgba(255, 255, 255, 0.15)";
+                }}
+              >
                 Get Started
               </Link>
+              <button
+                className="btn"
+                style={{
+                  padding: "0.8rem 2.5rem",
+                  fontSize: "1rem",
+                  background: "transparent",
+                  color: "rgba(255, 255, 255, 0.8)",
+                  borderRadius: "12px",
+                  fontWeight: "600",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease"
+                }}
+                onClick={() => {
+                  document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
+                }}
+              >
+                Learn More
+              </button>
             </div>
           </div>
         </section>
 
-        <section style={{ padding: "4rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-            <div className="glass-card card-hover animate-fade-in delay-100">
-              <div style={{ marginBottom: "1rem", color: "#00F5A0", fontSize: "2.5rem" }}>🛡️</div>
-              <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Smart Escrow</h3>
-              <p style={{ color: "var(--text-muted)" }}>Funds are locked in code, not banks. Released only when work is approved.</p>
+        <section id="features-section" style={{ padding: "12rem 2rem 8rem", maxWidth: "1100px", margin: "0 auto", position: 'relative', zIndex: 1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "2rem" }}>
+            <div className="glass-card card-hover animate-fade-in delay-100" style={{ padding: '2rem' }}>
+              <div style={{ marginBottom: "1.5rem", color: "#00C6FF", filter: 'drop-shadow(0 0 10px rgba(0, 198, 255, 0.8))' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <h3 style={{ fontSize: "1.25rem", marginBottom: "0.75rem", fontWeight: '700' }}>Smart Escrow</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: '0.95rem' }}>Funds are locked in code, not banks. Released only when work is approved.</p>
             </div>
-            <div className="glass-card card-hover animate-fade-in delay-200">
-              <div style={{ marginBottom: "1rem", color: "#F5E60B", fontSize: "2.5rem" }}>⚡</div>
-              <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Instant Pay</h3>
-              <p style={{ color: "var(--text-muted)" }}>No net-30 days. Get paid in USDC/XLM seconds after approval.</p>
+            <div className="glass-card card-hover animate-fade-in delay-200" style={{ padding: '2rem' }}>
+              <div style={{ marginBottom: "1.5rem", color: "#00C6FF", filter: 'drop-shadow(0 0 10px rgba(0, 198, 255, 0.8))' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              </div>
+              <h3 style={{ fontSize: "1.25rem", marginBottom: "0.75rem", fontWeight: '700' }}>Instant Pay</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: '0.95rem' }}>No net-30 days. Get paid in USDC/XLM seconds after approval.</p>
             </div>
-            <div className="glass-card card-hover animate-fade-in delay-300">
-              <div style={{ marginBottom: "1rem", color: "#00C6FF", fontSize: "2.5rem" }}>💻</div>
-              <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Code Preview</h3>
-              <p style={{ color: "var(--text-muted)" }}>Auto-executed previews for code submissions. See it before you pay.</p>
+            <div className="glass-card card-hover animate-fade-in delay-300" style={{ padding: '2rem' }}>
+              <div style={{ marginBottom: "1.5rem", color: "#00C6FF", filter: 'drop-shadow(0 0 10px rgba(0, 198, 255, 0.8))' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 18 22 12 16 6" />
+                  <polyline points="8 6 2 12 8 18" />
+                </svg>
+              </div>
+              <h3 style={{ fontSize: "1.25rem", marginBottom: "0.75rem", fontWeight: '700' }}>Code Preview</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: '0.95rem' }}>Auto-executed previews for code submissions. See it before you pay.</p>
             </div>
           </div>
         </section>
@@ -155,79 +153,124 @@ export default function HomePage() {
     );
   }
 
-  // Dashboard for logged-in users
+  // Dashboard for logged-in users (Space/Narrato Aesthetic)
   return (
-    <div>
-      <div className="page-header" style={{ padding: '6rem 0 4rem 0', background: 'radial-gradient(50% 50% at 50% 50%, rgba(37, 99, 235, 0.05) 0%, rgba(255, 255, 255, 0) 100%)', textAlign: 'center', display: 'block', borderBottom: 'none', marginBottom: '0' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '4rem', marginBottom: '1.5rem', lineHeight: '1.1' }}>
-            The <span style={{ color: 'var(--primary)' }}>Smartest</span> Way to Hire & Work.
+    <div style={{
+      minHeight: '100vh',
+      background: 'radial-gradient(ellipse at top, #0B1026 0%, #000000 100%)', // Deep space background
+      color: 'white',
+      paddingTop: '8rem', // Space for fixed navbar
+      position: 'relative',
+      overflow: 'hidden'
+      // note: global .App class might add padding, ensure this looks right
+    }}>
+
+      {/* Ambient Glows */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '20%',
+        width: '400px',
+        height: '400px',
+        background: 'radial-gradient(circle, rgba(0, 114, 255, 0.15) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        zIndex: 0
+      }}></div>
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        right: '10%',
+        width: '300px',
+        height: '300px',
+        background: 'radial-gradient(circle, rgba(121, 40, 202, 0.15) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        zIndex: 0
+      }}></div>
+
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+
+        {/* Main Hero & Quick Actions */}
+        <div className="dashboard-content animate-fade-in delay-100">
+          {/* Role Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '99px',
+            background: 'linear-gradient(90deg, rgba(0, 198, 255, 0.1), rgba(0, 114, 255, 0.1))',
+            border: '1px solid rgba(0, 198, 255, 0.3)',
+            marginBottom: '2rem',
+            fontSize: '0.85rem',
+            color: '#00C6FF',
+            fontWeight: '600'
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z" />
+            </svg>
+            {userRole === 'client' ? 'Client Workspace' : 'Freelancer Workspace'}
+          </div>
+
+          <h1 style={{ fontSize: '4.5rem', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', background: 'linear-gradient(to right, #ffffff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Your Work,<br />Securely Managed.
           </h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '3rem', margin: '0 auto 3rem auto', maxWidth: '600px' }}>
-            FairDeal connects clients and freelancers with a trustless escrow, ensuring you only pay for results and always get paid for your work.
+          <p style={{ fontSize: '1.2rem', color: '#94A3B8', marginBottom: '4rem', maxWidth: '600px', margin: '0 auto 4rem', lineHeight: 1.7 }}>
+            Create powerful agreements without paperwork. FairDeal uses smart contracts to turn agreements into guaranteed payments.
           </p>
 
-          {userRole === 'client' && (
-            <Link href="/create-job" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-              Get Started — Create Job
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', marginTop: '2rem' }}>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Recent Opportunities</h3>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>Status:</span>
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              style={{ padding: '0.5rem 1rem', width: 'auto', minWidth: '150px' }}
-            >
-              <option value="all">All Jobs</option>
-              <option value="created">Created</option>
-              <option value="submitted">Submitted Work</option>
-            </select>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="loading" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading available jobs...</div>
-        ) : filteredJobs.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-alt)', borderRadius: '12px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>📭</div>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>No jobs found in this category.</p>
-          </div>
-        ) : (
-          <div className="jobs-grid">
-            {filteredJobs.map((job: any) => (
-              <Link key={job.id} href={`/jobs/${job.id}`} className="job-card-link">
-                <div className="glass-card job-card card-hover">
-                  <div className="job-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="job-id">JOB-{job.id}</span>
-                    <span className={`status-badge ${getStatusClass(job.state)}`}>
-                      {getStatusLabel(job.state)}
-                    </span>
+          {/* Quick Action Cards (Centered Grid) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+            {userRole === 'client' ? (
+              <>
+                <Link href="/create-job" className="glass-card card-hover" style={{
+                  padding: '2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: '1.5rem',
+                  background: 'linear-gradient(135deg, rgba(0, 114, 255, 0.1), rgba(0,0,0,0))',
+                  border: '1px solid rgba(0, 198, 255, 0.2)'
+                }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(0, 114, 255, 0.3)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
                   </div>
-
-                  <div className="job-amount">
-                    ${job.amount} <span>USD</span>
+                  <div>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>Post New Job</h3>
+                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>Create a smart contract escrow.</p>
                   </div>
+                </Link>
 
-                  <div className="job-description">
-                    {job.description}
+                <Link href="/jobs" className="glass-card card-hover" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
                   </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>View All Jobs</h3>
+                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>Track your active contracts.</p>
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/jobs" className="glass-card card-hover" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'rgba(0, 245, 160, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0, 245, 160, 0.2)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00F5A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>Assigned Jobs</h3>
+                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>View work assigned to you.</p>
+                  </div>
+                </Link>
 
-                  <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>
-                    Due: {new Date(job.deadline).toLocaleDateString()}
-                  </div>
+                <div style={{ padding: '2rem', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', fontSize: '1rem', color: '#94A3B8', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  Contact clients to get hired via Smart Contracts.
                 </div>
-              </Link>
-            ))}
+              </>
+            )}
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );

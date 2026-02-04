@@ -44,16 +44,11 @@
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg-main);
+  background-color: #000000;
   color: var(--text-main);
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  background-image: 
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-  background-attachment: fixed;
   overflow-x: hidden;
 }
 
@@ -137,6 +132,9 @@ a {
 }
 
 /* Modern Logo */
+#root, html {
+  background-color: #000000;
+}
 .logo-container {
   display: flex;
   align-items: center;
@@ -232,9 +230,9 @@ a {
 
 .card-hover:hover {
   transform: translateY(-5px);
-  border-color: var(--primary);
+  border-color: #FFFFFF;
   background: var(--bg-card-hover);
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .glass-card::before {
@@ -346,7 +344,7 @@ input:focus, textarea:focus, select:focus {
 .blob-1 {
   width: 400px;
   height: 400px;
-  background: #7F00FF;
+  background: #f8f7fc;
   top: -100px;
   right: -100px;
   animation: float 8s infinite ease-in-out;
