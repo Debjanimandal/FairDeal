@@ -117,11 +117,11 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
   });
 
   return (
-    // @ts-ignore - React Three Fiber custom elements
+    // @ts-expect-error - React Three Fiber custom elements
     <mesh ref={ref}>
-      {/* @ts-ignore */}
+      {/* @ts-expect-error - React Three Fiber geometry type */}
       <planeGeometry args={[1, 1, 1, 1]} />
-      {/* @ts-ignore */}
+      {/* @ts-expect-error - React Three Fiber material type */}
       <shaderMaterial 
         uniforms={uniforms} 
         vertexShader={vertexShader} 
@@ -129,7 +129,7 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
         transparent={false}
         depthWrite={true}
       />
-      {/* @ts-ignore */}
+      {/* @ts-expect-error - React Three Fiber mesh children */}
     </mesh>
   );
 });
