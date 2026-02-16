@@ -28,8 +28,27 @@ export default function Navigation() {
     return null;
   }
 
+  // Determine styles based on auth state
+  const isAuth = !!wallet;
+
   const getLinkStyle = (path: string) => {
     const isActive = pathname === path;
+
+    // Auth User: White links (Right side)
+    if (isAuth) {
+      return {
+        padding: '0.5rem 1.2rem',
+        borderRadius: '8px',
+        background: isActive ? '#FFFFFF' : 'transparent',
+        color: isActive ? '#000000' : 'rgba(255, 255, 255, 0.9)',
+        fontWeight: isActive ? '600' : '400',
+        transition: 'all 0.3s ease',
+        display: 'inline-block',
+        textDecoration: 'none'
+      };
+    }
+
+    // Guest: Default styles
     return {
       padding: '0.5rem 1.2rem',
       borderRadius: '8px',
@@ -44,12 +63,25 @@ export default function Navigation() {
 
   return (
     <nav className="navbar" style={{
-      background: isScrolled ? 'rgba(5, 10, 30, 0.6)' : 'transparent',
-      backdropFilter: isScrolled ? 'blur(24px)' : 'none',
-      WebkitBackdropFilter: isScrolled ? 'blur(24px)' : 'none',
-      borderBottom: isScrolled ? '1px solid rgba(0, 198, 255, 0.1)' : '1px solid transparent',
+      // Auth: Transparent to show split background | Guest: Scroll-based Dark Glass
+      background: isAuth
+        ? 'transparent'
+        : (isScrolled ? 'rgba(5, 10, 30, 0.6)' : 'transparent'),
+      backdropFilter: isAuth
+        ? 'blur(0px)' // Clean split, maybe subtle blur if text illegible, but clean is requested
+        : (isScrolled ? 'blur(24px)' : 'none'),
+      WebkitBackdropFilter: isAuth
+        ? 'blur(0px)'
+        : (isScrolled ? 'blur(24px)' : 'none'),
+      borderBottom: isAuth
+        ? 'none'
+        : (isScrolled ? '1px solid rgba(0, 198, 255, 0.1)' : '1px solid transparent'),
       padding: isScrolled ? '0.4rem 0' : '0.8rem 0',
-      transition: 'all 0.3s ease'
+      transition: 'all 0.3s ease',
+      position: 'fixed',
+      top: 0,
+      width: '100%',
+      zIndex: 1000
     }}>
       <div className="nav-container">
         <Link href="/" className="logo-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -65,7 +97,17 @@ export default function Navigation() {
               </defs>
             </svg>
           </div>
-          <span className="text-gradient-primary" style={{ fontSize: '1.4rem', fontWeight: '800' }}>FairDeal</span>
+          {/* Logo Text: Dark for Auth (Left/White), White for Guest */}
+          <span style={{
+            fontSize: '1.4rem',
+            fontWeight: '800',
+            color: isAuth ? '#0F172A' : 'transparent',
+            background: isAuth ? 'none' : 'var(--gradient-primary)',
+            WebkitBackgroundClip: isAuth ? 'border-box' : 'text',
+            backgroundClip: isAuth ? 'border-box' : 'text'
+          }}>
+            FairDeal
+          </span>
         </Link>
 
         <div className="nav-links">

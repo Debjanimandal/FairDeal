@@ -61,7 +61,7 @@ export default function CreateJobPage() {
       setSuccess(`Creating smart contract and locking ${totalAmount} XLM in escrow...`);
 
       console.log("📝 Creating job in smart contract...");
-      
+
       // Create job in smart contract (locks full amount in escrow)
       const { jobId: contractJobId, txHash: escrowTransactionHash } = await createJobContract(
         wallet, // client
@@ -146,108 +146,234 @@ export default function CreateJobPage() {
   };
 
   return (
-    <div style={{ paddingTop: "8rem", paddingBottom: "4rem", paddingLeft: "2rem", paddingRight: "2rem", minHeight: "100vh" }}>
-      <div className="page-header" style={{ maxWidth: "800px", margin: "0 auto 2rem auto" }}>
-        <div className="page-title">
-          <h1>Create New Job</h1>
-          <p>Set up an escrow contract for your freelancer.</p>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      background: '#FFFFFF',
+      marginTop: '-80px',
+      paddingTop: '0',
+      overflow: 'hidden' // contain the curve
+    }}>
+
+      {/* LEFT COLUMN: Guidance (White) */}
+      <div style={{
+        flex: '1 1 400px',
+        background: '#FFFFFF',
+        color: '#0F172A',
+        padding: '10rem 6rem 4rem 4rem',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        zIndex: 10
+      }}>
+        <div className="animate-fade-in delay-100">
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '99px',
+            background: '#F1F5F9',
+            border: '1px solid #E2E8F0',
+            marginBottom: '2rem',
+            fontSize: '0.85rem',
+            color: '#0072FF',
+            fontWeight: '600'
+          }}>
+            Client Workspace
+          </div>
+
+          <h1 style={{
+            fontSize: '3.5rem',
+            fontWeight: '800',
+            lineHeight: 1.1,
+            marginBottom: '1rem',
+            color: '#0F172A',
+            letterSpacing: '-0.02em'
+          }}>
+            Create New<br />
+            <span style={{ color: '#0072FF' }}>Smart Contract</span>
+          </h1>
+          <p style={{ fontSize: '1.2rem', color: '#475569', marginBottom: '3rem', maxWidth: '480px' }}>
+            Set up an escrow contract for your freelancer. Funds are locked securely until work is approved.
+          </p>
+
+          <div style={{ background: '#F8FAFC', padding: '2rem', borderRadius: '24px', border: '1px solid #E2E8F0' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem' }}>How it works</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E0F2FE', color: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>1</div>
+                <div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.2rem' }}>Define Terms</div>
+                  <div style={{ fontSize: '0.9rem', color: '#64748B' }}>Set amount, deadline, and freelancer address.</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E0F2FE', color: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>2</div>
+                <div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.2rem' }}>Lock Funds</div>
+                  <div style={{ fontSize: '0.9rem', color: '#64748B' }}>Full amount is deposited into the smart contract escrow.</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E0F2FE', color: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>3</div>
+                <div>
+                  <div style={{ fontWeight: '600', marginBottom: '0.2rem' }}>Approve & Pay</div>
+                  <div style={{ fontSize: '0.9rem', color: '#64748B' }}>Funds release instantly when you approve the work.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="glass-card animate-fade-in" style={{ maxWidth: "800px", margin: "0 auto" }}>
+      {/* RIGHT COLUMN: Form (Dark Blue) */}
+      <div style={{
+        flex: '1 1 500px',
+        background: 'linear-gradient(135deg, #020617 0%, #172554 100%)',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 2rem 2rem 140px', // Add left padding to account for curve
+        minHeight: '100vh'
+      }}>
+        {/* Curve */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: -1,
+          bottom: 0,
+          width: '120px',
+          zIndex: 5,
+          pointerEvents: 'none'
+        }}>
+          <svg
+            preserveAspectRatio="none"
+            viewBox="0 0 100 100"
+            height="100%"
+            width="100%"
+            style={{ display: 'block', transform: 'scaleX(-1)' }}
+          >
+            <path d="M0 0 C 40 0 60 100 0 100 L 100 100 L 100 0 Z" fill="#FFFFFF" />
+          </svg>
+        </div>
 
-        {error && <div className="message-alert alert-error">{error}</div>}
-        {success && <div className="message-alert alert-success">{success}</div>}
+        <div className="glass-card animate-fade-in" style={{
+          width: '100%',
+          maxWidth: '550px',
+          position: 'relative',
+          zIndex: 10,
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          padding: '2.5rem',
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid-cols-2" style={{ display: "grid", gap: "2rem", marginBottom: "1.5rem" }}>
-            <div className="form-group">
-              <label>Freelancer Wallet Address *</label>
-              <input
-                type="text"
-                name="freelancerAddress"
-                placeholder="GB... or GC..."
-                value={formData.freelancerAddress}
+          {error && <div className="message-alert alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
+          {success && <div className="message-alert alert-success" style={{ marginBottom: '1.5rem' }}>{success}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+              <div className="form-group">
+                <label style={{ color: '#94A3B8' }}>Freelancer Wallet Address</label>
+                <input
+                  type="text"
+                  name="freelancerAddress"
+                  placeholder="GB... or GC..."
+                  value={formData.freelancerAddress}
+                  onChange={handleChange}
+                  required
+                  pattern="^G[A-Z0-9]{55}$"
+                  style={{ fontFamily: "monospace", background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label style={{ color: '#94A3B8' }}>Amount (XLM)</label>
+                <input
+                  type="number"
+                  name="amount"
+                  placeholder="e.g., 500"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  min="1"
+                  step="0.01"
+                  required
+                  style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                />
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label style={{ color: '#94A3B8' }}>Deadline</label>
+              <select
+                name="deadlineDays"
+                value={formData.deadlineDays}
+                onChange={handleChange}
+                style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+              >
+                <option value="1">1 day</option>
+                <option value="3">3 days</option>
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+              </select>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '2rem' }}>
+              <label style={{ color: '#94A3B8' }}>Job Description</label>
+              <textarea
+                name="description"
+                placeholder="Describe the work requirements..."
+                value={formData.description}
                 onChange={handleChange}
                 required
-                pattern="^G[A-Z0-9]{55}$"
-                style={{ fontFamily: "monospace" }}
+                style={{ height: '120px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
               />
             </div>
 
-            <div className="form-group">
-              <label>Payment Amount (USD) *</label>
-              <input
-                type="number"
-                name="amount"
-                placeholder="e.g., 500"
-                value={formData.amount}
-                onChange={handleChange}
-                min="1"
-                step="0.01"
-                required
-              />
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button
+                type="submit"
+                className="btn"
+                disabled={loading}
+                style={{
+                  flex: 2,
+                  background: '#FFFFFF',
+                  color: '#0F172A',
+                  border: 'none',
+                  padding: '0.6rem 1.2rem',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  borderRadius: '8px'
+                }}
+              >
+                {loading ? "Creating..." : "Create Job Contract"}
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={() => router.push("/")}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: '0.6rem 1.2rem',
+                  fontSize: '0.9rem'
+                }}
+              >
+                Cancel
+              </button>
             </div>
-          </div>
-
-          <div className="form-group">
-            <label>Deadline (days from now) *</label>
-            <select
-              name="deadlineDays"
-              value={formData.deadlineDays}
-              onChange={handleChange}
-            >
-              <option value="1">1 day</option>
-              <option value="3">3 days</option>
-              <option value="7">7 days</option>
-              <option value="14">14 days</option>
-              <option value="30">30 days</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Job Description *</label>
-            <textarea
-              name="description"
-              placeholder="Describe the work you need done..."
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-              style={{ flex: 2 }}
-            >
-              {loading ? "Creating Job..." : "Create Job & Lock Funds"}
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => router.push("/")}
-              style={{ flex: 1 }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-
-        <div className="message-alert alert-info" style={{ marginTop: "3rem" }}>
-          <div>
-            <strong>How it works:</strong>
-            <ol style={{ marginTop: "0.5rem", marginLeft: "1.5rem", lineHeight: "1.8" }}>
-              <li>Create the job with freelancer details</li>
-              <li>Lock the full amount in smart contract escrow (1 transaction)</li>
-              <li>Freelancer submits work</li>
-              <li>You review and approve/reject</li>
-              <li>On approval, full amount is released to freelancer automatically</li>
-            </ol>
-          </div>
+          </form>
         </div>
       </div>
     </div>

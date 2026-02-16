@@ -7,6 +7,16 @@ import dynamic from 'next/dynamic';
 // Dynamically import Threads component (client-side only)
 const Threads = dynamic(() => import('@/components/Threads'), { ssr: false });
 const Sparkles = dynamic(() => import('@/components/Sparkles'), { ssr: false });
+const Silk = dynamic(() => import('@/components/Silk'), { 
+  ssr: false,
+  loading: () => (
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      background: 'linear-gradient(135deg, #020617 0%, #172554 100%)'
+    }} />
+  )
+});
 
 export default function HomePage() {
   const { wallet, userRole } = useWallet();
@@ -153,56 +163,70 @@ export default function HomePage() {
     );
   }
 
-  // Dashboard for logged-in users (Space/Narrato Aesthetic)
+  // Dashboard for logged-in users (Split Screen Aesthetic)
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'radial-gradient(ellipse at top, #0B1026 0%, #000000 100%)', // Deep space background
-      color: 'white',
-      paddingTop: '8rem', // Space for fixed navbar
-      position: 'relative',
-      overflow: 'hidden'
-      // note: global .App class might add padding, ensure this looks right
+      display: 'flex',
+      flexDirection: 'row', // Row on desktop
+      flexWrap: 'wrap',     // Wrap on mobile
+      overflow: 'hidden',
+      background: '#041031', // Dark blue base
+      marginTop: '-80px',    // Counteract global .App padding
+      paddingTop: '0',
+      position: 'relative'
     }}>
 
-      {/* Ambient Glows */}
-      <div style={{
-        position: 'absolute',
-        top: '10%',
-        left: '20%',
-        width: '400px',
-        height: '400px',
-        background: 'radial-gradient(circle, rgba(0, 114, 255, 0.15) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        zIndex: 0
-      }}></div>
-      <div style={{
-        position: 'absolute',
-        top: '30%',
-        right: '10%',
-        width: '300px',
-        height: '300px',
-        background: 'radial-gradient(circle, rgba(121, 40, 202, 0.15) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        zIndex: 0
-      }}></div>
+      {/* Curved SVG Overlay - White section with smooth wave */}
+      <svg
+        className="animate-in fade-in zoom-in duration-1000"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 2,
+          pointerEvents: 'none',
+          filter: 'drop-shadow(10px 0px 20px rgba(0, 0, 0, 0.15))' // Soft shadow
+        }}
+        preserveAspectRatio="none"
+        viewBox="0 0 100 100"
+      >
+        <path d="M0,0 L55,0 C35,35 75,65 55,100 L0,100 Z" fill="#ffffff" />
+      </svg>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      {/* LEFT COLUMN: Welcome & Context (White with Curve) */}
+      <div style={{
+        flex: '1 1 500px',
+        background: 'transparent',
+        color: '#0F172A',
+        padding: '10rem 6rem 4rem 4rem',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'visible',
+        width: '75%',
+        zIndex: 3
+      }}>
 
-        {/* Main Hero & Quick Actions */}
-        <div className="dashboard-content animate-fade-in delay-100">
-          {/* Role Badge */}
+        <div className="animate-fade-in delay-100" style={{
+          position: 'relative',
+          zIndex: 10
+        }}>
+          {/* Role Badge (Light Mode) */}
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             padding: '8px 16px',
             borderRadius: '99px',
-            background: 'linear-gradient(90deg, rgba(0, 198, 255, 0.1), rgba(0, 114, 255, 0.1))',
-            border: '1px solid rgba(0, 198, 255, 0.3)',
+            background: '#F1F5F9', // Light gray bg
+            border: '1px solid #E2E8F0',
             marginBottom: '2rem',
             fontSize: '0.85rem',
-            color: '#00C6FF',
+            color: '#0072FF', // Blue text
             fontWeight: '600'
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -211,67 +235,272 @@ export default function HomePage() {
             {userRole === 'client' ? 'Client Workspace' : 'Freelancer Workspace'}
           </div>
 
-          <h1 style={{ fontSize: '4.5rem', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', background: 'linear-gradient(to right, #ffffff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Your Work,<br />Securely Managed.
+          <h1 style={{
+            fontSize: 'clamp(3rem, 4vw, 4.5rem)',
+            fontWeight: '800',
+            lineHeight: 1.1,
+            marginBottom: '1.5rem',
+            color: '#0F172A', // Dark Slate
+            letterSpacing: '-0.02em'
+          }}>
+            Your Work,<br />
+            <span style={{ color: '#0072FF' }}>Securely</span> Managed.
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#94A3B8', marginBottom: '4rem', maxWidth: '600px', margin: '0 auto 4rem', lineHeight: 1.7 }}>
+          <p style={{
+            fontSize: '1.2rem',
+            color: '#475569', // Dark Gray
+            marginBottom: '3rem',
+            maxWidth: '500px',
+            lineHeight: 1.7
+          }}>
             Create powerful agreements without paperwork. FairDeal uses smart contracts to turn agreements into guaranteed payments.
           </p>
 
-          {/* Quick Action Cards (Centered Grid) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-            {userRole === 'client' ? (
-              <>
-                <Link href="/create-job" className="glass-card card-hover" style={{
-                  padding: '2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  gap: '1.5rem',
-                  background: 'linear-gradient(135deg, rgba(0, 114, 255, 0.1), rgba(0,0,0,0))',
-                  border: '1px solid rgba(0, 198, 255, 0.2)'
-                }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(0, 114, 255, 0.3)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>Post New Job</h3>
-                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>Create a smart contract escrow.</p>
-                  </div>
-                </Link>
+          {/* Post Your Job Button */}
+          {userRole === 'client' && (
+            <Link
+              href="/create-job"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                background: '#172554',
+                color: '#FFFFFF',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                boxShadow: '0 2px 12px rgba(23, 37, 84, 0.3)',
+                transition: 'all 0.3s ease',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(23, 37, 84, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 12px rgba(23, 37, 84, 0.3)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Post Your Job
+            </Link>
+          )}
+        </div>
+      </div>
 
-                <Link href="/jobs" className="glass-card card-hover" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>View All Jobs</h3>
-                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>Track your active contracts.</p>
-                  </div>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/jobs" className="glass-card card-hover" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'rgba(0, 245, 160, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0, 245, 160, 0.2)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00F5A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.5rem' }}>Assigned Jobs</h3>
-                    <p style={{ fontSize: '1rem', color: '#94A3B8' }}>View work assigned to you.</p>
-                  </div>
-                </Link>
+      {/* 3D Bubbles Along Curve - Exact positioning from reference */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
+        pointerEvents: 'none'
+      }}>
+        {/* Solid 3D Bubbles Along Curve - Drifting from Ocean to White */}
+        {[
+          { cx: '58%', cy: '10%', r: '25', duration: '12s' },
+          { cx: '56%', cy: '18%', r: '15', duration: '15s' },
+          { cx: '52%', cy: '28%', r: '45', duration: '18s' },  // Large bubble
+          { cx: '54%', cy: '38%', r: '20', duration: '14s' },
+          { cx: '56%', cy: '48%', r: '35', duration: '16s' },
+          { cx: '52%', cy: '58%', r: '25', duration: '13s' },
+          { cx: '58%', cy: '68%', r: '50', duration: '20s' },  // Large bubble
+          { cx: '54%', cy: '82%', r: '30', duration: '17s' }
+        ].map((b, i) => {
+          const radius = parseFloat(b.r);
+          return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: `${b.r}px`,
+              height: `${b.r}px`,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 30%, #3B5998, #1e3a8a, #0F2557)',
+              boxShadow: `
+                0 ${radius * 0.3}px ${radius * 0.6}px rgba(0, 0, 0, 0.4),
+                inset -${radius * 0.1}px -${radius * 0.1}px ${radius * 0.2}px rgba(0, 0, 0, 0.5),
+                inset ${radius * 0.15}px ${radius * 0.15}px ${radius * 0.25}px rgba(255, 255, 255, 0.2)
+              `,
+              top: b.cy,
+              left: b.cx,
+              transform: 'translate(-50%, -50%)',
+              filter: 'brightness(1.1)',
+              animation: `bubble-drift ${b.duration} ease-in-out infinite alternate`,
+              animationDelay: `${i * -2}s`
+            }}
+          />
+        );
+        })}
+      </div>
 
-                <div style={{ padding: '2rem', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', fontSize: '1rem', color: '#94A3B8', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  Contact clients to get hired via Smart Contracts.
-                </div>
-              </>
-            )}
-          </div>
+      {/* RIGHT COLUMN: Actions & Visuals (Dark Blue with Silk Animation) */}
+      <div style={{
+        flex: '1 1 500px',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem',
+        minHeight: '600px',
+        overflow: 'hidden',
+        zIndex: 1
+      }}>
+
+        {/* Silk Shader Background with Wavy Texture */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1
+        }}>
+          <Silk 
+            speed={3}
+            scale={2}
+            color="#1e3a8a"
+            noiseIntensity={1.2}
+            rotation={0.5}
+          />
         </div>
 
+        {/* Wavy Pattern Overlay */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 2,
+          pointerEvents: 'none',
+          background: `
+            repeating-linear-gradient(
+              -45deg,
+              transparent,
+              transparent 20px,
+              rgba(30, 58, 138, 0.15) 20px,
+              rgba(30, 58, 138, 0.15) 40px
+            )
+          `,
+          opacity: 0.3
+        }} />
+
       </div>
-    </div>
+
+      {/* Bubble Animation Styles */}
+      <style jsx>{`
+        @keyframes floatLeftSlow {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.6;
+          }
+          50% {
+            transform: translate(-600px, -50px) scale(1.1);
+            opacity: 0.4;
+          }
+          90% {
+            opacity: 0.3;
+          }
+          100% {
+            transform: translate(-1200px, -100px) scale(0.8);
+            opacity: 0;
+          }
+        }
+
+        @keyframes floatLeftMedium {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.7;
+          }
+          50% {
+            transform: translate(-500px, 30px) scale(1.2);
+            opacity: 0.5;
+          }
+          90% {
+            opacity: 0.3;
+          }
+          100% {
+            transform: translate(-1000px, 60px) scale(0.9);
+            opacity: 0;
+          }
+        }
+
+        @keyframes floatLeftFast {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+          }
+          15% {
+            opacity: 0.8;
+          }
+          50% {
+            transform: translate(-450px, -30px) scale(1.15);
+            opacity: 0.6;
+          }
+          85% {
+            opacity: 0.4;
+          }
+          100% {
+            transform: translate(-900px, -60px) scale(0.85);
+            opacity: 0;
+          }
+        }
+
+        @keyframes flowLeft {
+          0% {
+            transform: translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateX(-100vw);
+            opacity: 0;
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+
+        @keyframes glowPulse {
+          0%, 100% {
+            opacity: 0.8;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+
+      </div>
   );
 }

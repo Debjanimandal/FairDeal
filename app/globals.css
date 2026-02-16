@@ -11,28 +11,28 @@
   --gradient-primary: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
   --gradient-accent: linear-gradient(135deg, #7F00FF 0%, #E100FF 100%);
   --gradient-glass: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.00) 100%);
-  
+
   /* Brand Colors */
   --primary: #0072FF;
   --primary-glow: rgba(0, 114, 255, 0.6);
   --accent: #E100FF;
-  
+
   --text-main: #FFFFFF;
   --text-muted: #94A3B8;
-  
+
   --success: #00F5A0;
   --warning: #F5E60B;
   --error: #FF4D4D;
-  
+
   --border: rgba(255, 255, 255, 0.1);
   --border-hover: rgba(255, 255, 255, 0.2);
-  
+
   --shadow-glow: 0 0 20px rgba(0, 114, 255, 0.3);
   --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
   --font-main: 'Outfit', sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
-  
+
   --radius: 20px;
 }
 
@@ -56,13 +56,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
@@ -75,20 +78,55 @@ a {
 
 /* Animations */
 @keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes bubble-drift {
+  0% {
+    transform: translate(-50%, -50%) translateX(0);
+    opacity: 1;
+  }
+  
+  100% {
+    transform: translate(-50%, -50%) translateX(-300px);
+    opacity: 0.3;
+  }
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 0 0 rgba(0, 114, 255, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(0, 114, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 114, 255, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 114, 255, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 114, 255, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 114, 255, 0);
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -99,9 +137,17 @@ a {
   animation: float 6s ease-in-out infinite;
 }
 
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
 
 /* Navbar */
 .navbar {
@@ -132,9 +178,11 @@ a {
 }
 
 /* Modern Logo */
-#root, html {
+#root,
+html {
   background-color: #000000;
 }
+
 .logo-container {
   display: flex;
   align-items: center;
@@ -242,7 +290,7 @@ a {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 /* Typography & Hero */
@@ -281,7 +329,7 @@ a {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 80px; 
+  padding-top: 80px;
 }
 
 .main-content {
@@ -290,7 +338,9 @@ a {
 }
 
 /* Inputs */
-input, textarea, select {
+input,
+textarea,
+select {
   width: 100%;
   padding: 1rem 1.5rem;
   background: rgba(0, 0, 0, 0.2);
@@ -302,7 +352,9 @@ input, textarea, select {
   transition: all 0.3s;
 }
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--primary);
   background: rgba(0, 0, 0, 0.4);
@@ -332,6 +384,43 @@ input:focus, textarea:focus, select:focus {
   color: var(--text-muted);
 }
 
+/* Status Badges */
+.status-badge {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-created {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-submitted {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-approved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-rejected {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-refunded {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9CA3AF;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
 /* Background Blobs */
 .bg-blob {
   position: absolute;
@@ -358,3 +447,68 @@ input:focus, textarea:focus, select:focus {
   left: -50px;
   animation: float 10s infinite ease-in-out reverse;
 }
+/* --- Interactive Fluid Background (Added for Dashboard) --- */
+
+.interactive-zone {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
+.fluid-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: pulse-fluid 8s infinite alternate;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: #4361EE;
+  top: -100px;
+  right: -100px;
+  transform: translate(calc(var(--mouse-x) * -0.05), calc(var(--mouse-y) * -0.05));
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: #7209B7;
+  bottom: -50px;
+  left: -50px;
+  transform: translate(calc(var(--mouse-x) * 0.05), calc(var(--mouse-y) * 0.05));
+  animation-delay: -2s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #4CC9F0;
+  top: 40%;
+  left: 40%;
+  transform: translate(calc(var(--mouse-x) * 0.02), calc(var(--mouse-y) * 0.02));
+  animation-delay: -4s;
+  opacity: 0.4;
+}
+
+/* Keyframes for Fluid & Signing Animations */
+
+@keyframes pulse-fluid {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.1) translate(20px, -20px); }
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(0.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+

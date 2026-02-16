@@ -21,6 +21,35 @@ export default function JobDetailPage() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
+    // Add custom navbar styling for this page only
+    const styleElement = document.createElement('style');
+    styleElement.id = 'job-details-navbar-override';
+    styleElement.innerHTML = `
+      .navbar {
+        background: rgba(11, 16, 38, 0.4) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+      }
+      .navbar .logo-container span {
+        color: transparent !important;
+        background: linear-gradient(to right, #00C6FF, #0072FF) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    // Cleanup when leaving the page
+    return () => {
+      const style = document.getElementById('job-details-navbar-override');
+      if (style) {
+        style.remove();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     loadJobDetails();
 
     // Auto-refresh when window gains focus (user switches back to tab)
@@ -79,7 +108,7 @@ export default function JobDetailPage() {
     if (job?.fraudFlagRaised) return "Terminated (Fraud Flag)";
     if (job?.cancelledBy === 'client') return "Deal Cancelled";
 
-    const labels: { [key: number]: string } = {
+    const labels: { [key: number]: string} = {
       0: "Created",
       1: "Submitted",
       2: "Approved",
@@ -220,429 +249,763 @@ export default function JobDetailPage() {
     }
   };
 
-
-
   if (loading) return <div className="loading">Loading job details...</div>;
   if (!job) return <div className="error-message">Job not found</div>;
 
   const isClient = wallet === job.client || userRole === "client";
   const isFreelancer = wallet === job.freelancer || userRole === "freelancer";
-
-  // Effective state: If we have preview data (jobStatus), treat state as 1 (Submitted) 
-  // unless it's already higher (Approved/Rejected)
-  // Effective state priority:
-  // 1. Fraud Flag -> 3 (Terminated)
-  // 2. State 0 + Submission -> 1 (Submitted)
-  // 3. Otherwise -> Actual State
   const effectiveState = job.fraudFlagRaised ? 3 : ((job.state === 0 && jobStatus) ? 1 : job.state);
 
   return (
-    <div style={{ paddingTop: "8rem", paddingBottom: "4rem", paddingLeft: "2rem", paddingRight: "2rem", minHeight: "100vh" }}>
-      <div className="page-header" style={{ maxWidth: "800px", margin: "0 auto 2rem auto" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+    <div style={{
+      minHeight: '100vh',
+      background: 'radial-gradient(ellipse at top, #0B1026 0%, #000000 100%)',
+      paddingTop: '1rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Ambient Glow */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '600px',
+        height: '600px',
+        background: 'radial-gradient(circle, rgba(0, 198, 255, 0.1) 0%, transparent 70%)',
+        filter: 'blur(100px)',
+        zIndex: 0
+      }}></div>
+
+      {/* Main Content Area */}
+      <div style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '2rem',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        {/* Back Button & Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          marginBottom: '1.5rem'
+        }}>
           <button
-            className="btn btn-secondary"
-            onClick={() => router.push('/')}
-            style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}
+            onClick={() => router.push('/jobs')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 10px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '6px',
+              color: '#E2E8F0',
+              fontSize: '0.85rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
           >
-            ← Back
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
           </button>
-          <div className="page-title">
-            <h1>Job Details <span style={{ opacity: 0.5, fontSize: "1.2rem" }}>#{jobId}</span></h1>
-          </div>
-        </div>
-      </div>
 
-      <div className="glass-card animate-fade-in" style={{ maxWidth: "800px", margin: "0 auto" }}>
-        {error && <div className="message-alert alert-error">{error}</div>}
-
-        <div className="grid-cols-3" style={{ display: "grid", gap: "2rem", marginBottom: "2.5rem" }}>
-          <div style={{ padding: "1.5rem", background: "rgba(15, 23, 42, 0.4)", borderRadius: "12px", border: "1px solid var(--border)" }}>
-            <label style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "0.5rem", display: "block" }}>Escrow Amount</label>
-            <div style={{ fontSize: "2rem", color: "var(--success)", fontWeight: "800" }}>
-              ${job.amount}
-            </div>
-          </div>
-
-          <div style={{ padding: "1.5rem", background: "rgba(15, 23, 42, 0.4)", borderRadius: "12px", border: "1px solid var(--border)" }}>
-            <label style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "0.5rem", display: "block" }}>Status</label>
-            <div className={`status-badge ${getStatusClass(job.state) || ""}`} style={{ fontSize: "1rem", padding: "0.5rem 1rem" }}>
-              {getStateLabel(job.state)}
-            </div>
-          </div>
-
-          <div style={{ padding: "1.5rem", background: "rgba(15, 23, 42, 0.4)", borderRadius: "12px", border: "1px solid var(--border)" }}>
-            <label style={{ fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "0.5rem", display: "block" }}>Deadline</label>
-            <div style={{ fontSize: "1.2rem", fontWeight: "600" }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                {new Date(job.deadline).toLocaleDateString()}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: "2.5rem" }}>
-          <h3 style={{ marginBottom: "1rem", color: "var(--text-main)" }}>Description</h3>
-          <div style={{ padding: "1.5rem", background: "rgba(15, 23, 42, 0.4)", borderRadius: "12px", lineHeight: "1.8", color: "var(--text-main)" }}>
-            {job.description}
-          </div>
-        </div>
-
-        {/* Work Submission Status for Client */}
-        {isClient && (
-          <div style={{ marginBottom: "2.5rem", padding: "1.5rem", background: job.state === 0 ? "rgba(251, 191, 36, 0.1)" : job.state === 1 ? "rgba(34, 197, 94, 0.1)" : "rgba(15, 23, 42, 0.4)", borderRadius: "12px", border: `1px solid ${job.state === 0 ? 'var(--warning)' : job.state === 1 ? 'var(--success)' : 'var(--border)'}` }}>
-            <h3 style={{ marginBottom: "1rem", color: "var(--text-main)", display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {job.state === 0 ? (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                  <span style={{ color: "var(--warning)" }}>Waiting for Freelancer Submission</span>
-                </>
-              ) : job.state === 1 ? (
-                <>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                  <span style={{ color: "var(--success)" }}>Work Submitted - Ready for Review</span>
-                </>
-              ) : (
-                <span>Work Status</span>
-              )}
-            </h3>
-            <p style={{ color: "var(--text-muted)", lineHeight: "1.6" }}>
-              {job.state === 0 && (
-                <>
-                  The freelancer has <strong>not submitted any work yet</strong>. You will be notified once they upload their deliverables.
-                  <br /><br />
-                  <span style={{ fontSize: "0.9rem" }}>💡 Tip: The freelancer has until <strong>{new Date(job.deadline).toLocaleDateString()}</strong> to submit their work.</span>
-                </>
-              )}
-              {job.state === 1 && (
-                <>
-                  The freelancer has <strong>submitted their work</strong>. You can now review the preview and decide to approve or request revisions.
-                  <br /><br />
-                  <span style={{ fontSize: "0.9rem" }}>👇 Scroll down to see the preview and action buttons.</span>
-                </>
-              )}
-              {job.state === 2 && (
-                <>Work has been <strong>approved</strong> and payment released to the freelancer.</>
-              )}
-              {job.state === 3 && (
-                <>This job has been <strong>terminated or rejected</strong>.</>
-              )}
+          <div>
+            <h1 style={{
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              color: '#F1F5F9',
+              marginBottom: '0.15rem',
+              letterSpacing: '-0.02em'
+            }}>
+              Job Details
+            </h1>
+            <p style={{ 
+              fontSize: '0.8rem', 
+              color: '#94A3B8',
+              fontWeight: '500',
+              margin: 0
+            }}>
+              #{jobId}
             </p>
           </div>
-        )}
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", fontSize: "0.9rem", color: "var(--text-muted)" }}>
-          <div>
-            <strong>Client Wallet:</strong>
-            <div style={{ fontFamily: "monospace", marginTop: "0.5rem", background: "rgba(0,0,0,0.2)", padding: "0.5rem", borderRadius: "6px" }}>
-              {job.client}
-            </div>
-          </div>
-          <div>
-            <strong>Freelancer Wallet:</strong>
-            <div style={{ fontFamily: "monospace", marginTop: "0.5rem", background: "rgba(0,0,0,0.2)", padding: "0.5rem", borderRadius: "6px" }}>
-              {job.freelancer}
-            </div>
-          </div>
         </div>
 
-        {/* Fraud Flag Warning */}
-        {job.fraudFlagRaised && (
-          <div className="message-alert alert-error" style={{ marginTop: "1.5rem" }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-              <strong>Fraud Flag Raised</strong> - Client has reported fraudulent behavior on this job.
-            </div>
-            <div style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
-              Flagged on: {new Date(job.fraudFlagTimestamp).toLocaleString()}
-            </div>
+        {error && (
+          <div style={{
+            padding: '1rem',
+            background: '#FEE2E2',
+            border: '1px solid #FCA5A5',
+            borderRadius: '12px',
+            color: '#991B1B',
+            marginBottom: '2rem'
+          }}>
+            {error}
           </div>
         )}
 
-        {/* Total Amount Display */}
-        <div style={{ marginTop: "1.5rem", padding: "1rem", background: "rgba(15, 23, 42, 0.4)", borderRadius: "12px", border: "1px solid var(--border)" }}>
-          <h4 style={{ marginBottom: "0.75rem", fontSize: "1rem" }}>Payment Details</h4>
-          <div style={{ fontSize: "0.9rem" }}>
-            <div>
-              <div style={{ color: "var(--text-muted)" }}>Total Amount in Escrow</div>
-              <div style={{ fontWeight: "bold", fontSize: "1.5rem", color: "var(--primary)" }}>
-                ${job.amount}
+        {/* Main Content Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '2rem',
+          marginBottom: '2rem'
+        }}>
+          {/* Left Column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Top Row - Escrow Amount and Status */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1.5rem'
+            }}>
+              {/* Escrow Amount Card */}
+              <div style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <p style={{
+                  fontSize: '0.8rem',
+                  color: '#64748B',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}>
+                  Escrow Amount
+                </p>
+                <div style={{
+                  fontSize: '1.8rem',
+                  fontWeight: '700',
+                  color: '#0F172A'
+                }}>
+                  ${job.amount}
+                </div>
               </div>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.25rem" }}>
-                {job.state === 0 ? "🔒 Locked in smart contract" : job.state === 2 ? "✅ Released to freelancer" : "🔒 Held in escrow"}
+
+              {/* Status Card */}
+              <div style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <p style={{
+                  fontSize: '0.8rem',
+                  color: '#64748B',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}>
+                  Status
+                </p>
+                <div style={{
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  color: '#0F172A'
+                }}>
+                  {getStateLabel(job.state)}
+                </div>
+              </div>
+            </div>
+
+            {/* Second Row - Deadline and Icon */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1.5rem'
+            }}>
+              {/* Deadline Card */}
+              <div style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <p style={{
+                  fontSize: '0.8rem',
+                  color: '#64748B',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}>
+                  Deadline
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: '#0F172A',
+                  fontSize: '1.1rem',
+                  fontWeight: '600'
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  {new Date(job.deadline).toLocaleDateString()}
+                </div>
+              </div>
+
+              {/* Description Card */}
+              <div style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                <p style={{
+                  fontSize: '0.8rem',
+                  color: '#64748B',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}>
+                  Description
+                </p>
+                <p style={{
+                  fontSize: '0.95rem',
+                  color: '#0F172A',
+                  lineHeight: '1.6'
+                }}>
+                  {job.description}
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Submission Preview (for Client) */}
-      {
-        isClient && jobStatus && (
-          <div className="glass-card" style={{ marginTop: "2rem", borderTop: "4px solid var(--primary)" }}>
-            <h3 style={{ marginBottom: "1.5rem", display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-              Work Submission Review
-            </h3>
+          {/* Right Column - Work Submission Review */}
+          <div>
+            {isClient && jobStatus && effectiveState === 1 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '1rem'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <h2 style={{
+                  fontSize: '0.95rem',
+                  fontWeight: '700',
+                  color: '#0F172A',
+                  margin: 0
+                }}>
+                  Work Submission Review
+                </h2>
+              </div>
 
-            <div className="message-alert alert-info">
-              Freelancer has submitted work. Review the preview below before approving payment.
-            </div>
+              <p style={{
+                fontSize: '0.8rem',
+                color: '#64748B',
+                marginBottom: '1rem',
+                lineHeight: '1.5'
+              }}>
+                Freelancer has submitted work, Review the preview below before approving payment.
+              </p>
 
-            <div style={{ marginBottom: "2rem" }}>
-              <label style={{ fontWeight: "bold", display: "block", marginBottom: "0.5rem" }}>Watermarked Preview:</label>
-              <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              {/* Blue Info Box */}
+              <div style={{
+                background: '#1E3A8A', // Dark blue
+                borderRadius: '8px',
+                padding: '1rem',
+                marginBottom: '1rem',
+                color: 'white'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.35rem'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <h3 style={{
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    margin: 0
+                  }}>
+                    Work Submitted - Ready for Review
+                  </h3>
+                </div>
+                <p style={{
+                  fontSize: '0.75rem',
+                  color: 'rgba(255,255,255,0.8)',
+                  lineHeight: '1.4',
+                  margin: 0
+                }}>
+                  The Freelancer has submitted their work. You can now review the preview and decide to approve or request revisions.
+                </p>
+              </div>
+
+              {/* Preview Button Box */}
+              <div style={{
+                background: '#F1F5F9', // Light gray/blue
+                borderRadius: '8px',
+                padding: '1.25rem 0.75rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative'
+              }}>
+                {/* Background Pattern/Icon placeholder */}
+                <div style={{
+                  position: 'absolute',
+                  right: '20px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  opacity: 0.1
+                }}>
+                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1">
+                     <circle cx="12" cy="12" r="10"></circle>
+                     <path d="M1 12h22"></path>
+                   </svg>
+                </div>
+
                 <a
                   href={jobStatus.previewURL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.6rem 1.2rem',
+                    background: '#1E293B', // Dark button
+                    color: 'white',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    boxShadow: '0 2px 4px -1px rgba(0, 0, 0, 0.1)'
+                  }}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    View Preview File
-                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  View Preview File
                 </a>
-                <span style={{ fontSize: "0.9rem", color: "var(--text-muted)" }}>
-                  Submitted: {jobStatus.submittedAt}
-                </span>
               </div>
-            </div>
 
-            <div style={{ display: "flex", gap: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border)" }}>
-              {/* Debug info - remove later */}
-              <div style={{ display: 'none' }}>state: {job.state}, effective: {effectiveState}</div>
-
-              {effectiveState === 3 ? (
-                <div className="message-alert alert-error" style={{ width: '100%', textAlign: 'center', fontWeight: 'bold' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                    Contract Terminated & Refunded (Fraud Flag). No further actions allowed.
-                  </div>
-                </div>
-              ) : (
-                <>
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', gap: '0.65rem' }}>
                   <button
-                    className="btn btn-success"
                     onClick={handleApprove}
-                    disabled={approving || effectiveState !== 1}
-                    style={{ flex: 1, opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer' }}
+                    disabled={approving}
+                    style={{
+                      flex: 1,
+                      padding: '0.65rem',
+                      background: '#1E293B', // Dark Blue
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      cursor: approving ? 'not-allowed' : 'pointer',
+                      opacity: approving ? 0.8 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem'
+                    }}
                   >
-                    {approving ? "Releasing Funds..." : (
-                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Approve & Pay
-                      </span>
-                    )}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    {approving ? 'Processing...' : 'Approve & Pay'}
                   </button>
 
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <button
-                      className="btn btn-warning"
-                      onClick={handleReject}
-                      disabled={rejecting || effectiveState !== 1}
-                      style={{ width: '100%', opacity: effectiveState !== 1 ? 0.5 : 1, cursor: effectiveState !== 1 ? 'not-allowed' : 'pointer', background: '#f59e0b', color: 'white' }}
-                    >
-                      {rejecting ? "Processing..." : (
-                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
-                          Request Revision
-                        </span>
-                      )}
-                    </button>
+                  <button
+                    onClick={handleReject}
+                    disabled={rejecting}
+                    style={{
+                      flex: 1,
+                      padding: '0.65rem',
+                      background: '#F59E0B', // Orange
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      cursor: rejecting ? 'not-allowed' : 'pointer',
+                      opacity: rejecting ? 0.8 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 14 4 9 9 4"></polyline>
+                    </svg>
+                    {rejecting ? 'Processing...' : 'Request Revision'}
+                  </button>
+                </div>
 
-                    {effectiveState === 1 && (
-                      <button
-                        className="btn btn-danger"
-                        onClick={handleCancelDeal}
-                        disabled={rejecting}
-                        style={{ width: '100%', fontSize: '0.85rem', padding: '0.5rem' }}
-                      >
-                        {rejecting ? "Cancelling..." : (
-                          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                            Cancel Deal
-                          </span>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </>
+                <button
+                  onClick={handleCancelDeal}
+                  disabled={rejecting}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem',
+                    background: '#64748B', // Grayish Blue
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: rejecting ? 'not-allowed' : 'pointer',
+                    opacity: rejecting ? 0.8 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  Cancel Deal
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* CLIENT: Waiting for Submission */}
+          {isClient && effectiveState === 0 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: '#FEF3C7',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#0F172A',
+                marginBottom: '0.5rem'
+              }}>
+                Waiting for Submission
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#64748B',
+                lineHeight: '1.6'
+              }}>
+                The freelancer hasn&apos;t submitted work yet. You&apos;ll be notified when they upload.
+              </p>
+            </div>
+          )}
+
+          {/* FREELANCER: Submit Work */}
+          {isFreelancer && (effectiveState === 0 || effectiveState === 4) && (
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: '#DBEAFE',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#0F172A',
+                marginBottom: '0.5rem'
+              }}>
+                {effectiveState === 4 ? 'Revision Requested' : 'Ready to Submit?'}
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#64748B',
+                marginBottom: '1.5rem',
+                lineHeight: '1.6'
+              }}>
+                {effectiveState === 4 
+                  ? 'The client requested changes. Upload a new version.'
+                  : 'Upload your work to start the review process.'}
+              </p>
+              <button
+                onClick={() => router.push(`/submit-work/${jobId}`)}
+                style={{
+                  padding: '0.875rem 2rem',
+                  background: '#3B82F6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#2563EB'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#3B82F6'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                {effectiveState === 4 ? 'Upload Revised Work' : 'Upload Work'}
+              </button>
+            </div>
+          )}
+
+          {/* FREELANCER: Work Submitted */}
+          {isFreelancer && effectiveState === 1 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: '#D1FAE5',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#0F172A',
+                marginBottom: '0.5rem'
+              }}>
+                Work Submitted
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#64748B',
+                lineHeight: '1.6'
+              }}>
+                Your work has been submitted. The client will review and release funds or request revisions.
+              </p>
+            </div>
+          )}
+
+          {/* Approved */}
+          {effectiveState === 2 && (
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: '#D1FAE5',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#0F172A',
+                marginBottom: '0.5rem'
+              }}>
+                Job Approved
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#64748B',
+                marginBottom: '1.5rem',
+                lineHeight: '1.6'
+              }}>
+                Funds have been released! Transaction complete.
+              </p>
+              
+              {isClient && job.fileDetails && (
+                <a
+                  href={jobId ? API_ENDPOINTS.JOB_DOWNLOAD(jobId) : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.875rem 1.5rem',
+                    background: '#10B981',
+                    color: 'white',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontSize: '0.95rem',
+                    fontWeight: '600',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#059669'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#10B981'}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Download File ({job.fileDetails.fileName})
+                </a>
               )}
             </div>
-          </div>
-        )
-      }
+          )}
 
-      {/* Submit Work (for Freelancer) */}
-      {
-        isFreelancer && (effectiveState === 0 || effectiveState === 4) && (
-          <div className="glass-card" style={{ marginTop: "2rem", textAlign: "center", padding: "3rem" }}>
-            <h3 style={{ marginBottom: "1rem" }}>
-              {effectiveState === 4 ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                  Revision Requested
-                </span>
-              ) : "Ready to submit?"}
-            </h3>
-            <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
-              {effectiveState === 4
-                ? "The client successfully requested changes. Please upload a new version."
-                : "Upload your work to the secure vault to start the review process."}
-            </p>
-            <button
-              className="btn btn-primary"
-              onClick={() => router.push(`/submit-work/${jobId}`)}
-              style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                {effectiveState === 4 ? "Upload Revised Work" : "Upload Work File"}
-              </span>
-            </button>
-          </div>
-        )
-      }
-
-      {/* Revision Requested Status (for Freelancer) */}
-      {
-        isFreelancer && effectiveState === 4 && (
-          <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--warning)", background: "rgba(251, 191, 36, 0.1)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ color: "var(--warning)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          {/* Deal Cancelled */}
+          {effectiveState === 3 && job.cancelledBy === 'client' && (
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '60px',
+                height: '60px',
+                background: '#FEE2E2',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
               </div>
-              <div>
-                <h3 style={{ color: "var(--warning)" }}>⚠️ Client Requested Revisions</h3>
-                <p style={{ color: "var(--text-muted)" }}>
-                  The client has reviewed your work and requested changes. Please review their feedback and upload a revised version below.
-                </p>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '700',
+                color: '#0F172A',
+                marginBottom: '0.5rem'
+              }}>
+                Deal Cancelled
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#64748B',
+                lineHeight: '1.6'
+              }}>
+                {isClient
+                  ? 'You cancelled this deal. Funds have been refunded.'
+                  : 'The client cancelled this deal.'}
+              </p>
+            </div>
+          )}
+          {/* Fraud Flag Warning */}
+          {job.fraudFlagRaised && (
+            <div style={{
+              background: '#FEE2E2',
+              border: '1px solid #FCA5A5',
+              borderRadius: '16px',
+              padding: '2rem',
+              marginTop: '1.5rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                marginBottom: '0.5rem'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <strong style={{ color: '#991B1B', fontSize: '1rem' }}>Fraud Flag Raised</strong>
+              </div>
+              <div style={{ fontSize: '0.9rem', color: '#7F1D1D' }}>
+                Flagged on: {new Date(job.fraudFlagTimestamp).toLocaleString()}
               </div>
             </div>
+          )}
           </div>
-        )
-      }
-
-      {/* Work Submitted (for Freelancer) */}
-      {
-        isFreelancer && effectiveState === 1 && (
-          <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--success)", background: "rgba(34, 197, 94, 0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ color: "var(--success)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              </div>
-              <div>
-                <h3 style={{ color: "var(--success)" }}>Work Submitted Successfully</h3>
-                <p style={{ color: "var(--text-muted)" }}>
-                  Your work has been submitted. The client will review the preview and release funds or request revisions.
-                </p>
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {/* Deal Cancelled (for both Client and Freelancer) */}
-      {
-        effectiveState === 3 && job.cancelledBy === 'client' && (
-          <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--text-muted)", background: "rgba(107, 114, 128, 0.1)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ color: "var(--text-muted)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-              </div>
-              <div>
-                <h3 style={{ color: "var(--text-muted)" }}>Deal Cancelled</h3>
-                <p style={{ color: "var(--text-muted)" }}>
-                  {isClient
-                    ? "You cancelled this deal. The funds have been refunded to your wallet."
-                    : "The client cancelled this deal. Your submitted work remains with you."}
-                </p>
-                {job.cancelledAt && (
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-                    Cancelled on: {new Date(job.cancelledAt).toLocaleString()}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {/* Approved */}
-      {
-        effectiveState === 2 && (
-          <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--success)", background: "rgba(74, 222, 128, 0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ color: "var(--success)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              </div>
-              <div>
-                <h3 style={{ color: "var(--success)" }}>Job Approved</h3>
-                <p style={{ color: "var(--text-muted)" }}>
-                  Funds have been released! Transaction complete.
-                </p>
-
-                {/* Show File Download for Client ONLY after approval */}
-                {isClient && job.fileDetails && (
-                  <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--border)" }}>
-                    <h4 style={{ marginBottom: "0.5rem", display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                      Access Source Files
-                    </h4>
-
-                    <div className="message-alert alert-success" style={{ marginBottom: "1rem" }}>
-                      <strong>Download Unencrypted File:</strong>
-                      <div style={{ wordBreak: "break-all", marginTop: "0.5rem" }}>
-                        <a
-                          href={jobId ? API_ENDPOINTS.JOB_DOWNLOAD(jobId) : '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-primary"
-                          style={{
-                            display: 'inline-block',
-                            textDecoration: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px'
-                          }}
-                        >
-                          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Direct Download ({job.fileDetails.fileName})
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                    <p style={{ fontSize: "0.8rem", marginTop: "0.5rem", color: "var(--text-muted)" }}>
-                      File released securely from backend. No decryption needed.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {/* Rejected */}
-      {
-        effectiveState === 3 && (
-          <div className="glass-card" style={{ marginTop: "2rem", border: "1px solid var(--error)", background: "rgba(248, 113, 113, 0.05)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ color: "var(--error)" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-              </div>
-              <div>
-                <h3 style={{ color: "var(--error)" }}>Job Rejected</h3>
-                <p style={{ color: "var(--text-muted)" }}>
-                  The work was rejected and funds have been returned to the client.
-                </p>
-              </div>
-            </div>
-          </div>
-        )
-      }
-    </div >
+        </div>
+      </div>
+    </div>
   );
 }

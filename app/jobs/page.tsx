@@ -12,6 +12,35 @@ export default function JobsPage() {
     const [filter, setFilter] = useState<string>('all');
 
     useEffect(() => {
+        // Add custom navbar styling for this page only
+        const styleElement = document.createElement('style');
+        styleElement.id = 'jobs-page-navbar-override';
+        styleElement.innerHTML = `
+            .navbar {
+                background: rgba(11, 16, 38, 0.4) !important;
+                backdrop-filter: blur(24px) !important;
+                -webkit-backdrop-filter: blur(24px) !important;
+                border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            }
+            .navbar .logo-container span {
+                color: transparent !important;
+                background: linear-gradient(to right, #00C6FF, #0072FF) !important;
+                -webkit-background-clip: text !important;
+                background-clip: text !important;
+            }
+        `;
+        document.head.appendChild(styleElement);
+
+        // Cleanup when leaving the page
+        return () => {
+            const style = document.getElementById('jobs-page-navbar-override');
+            if (style) {
+                style.remove();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         if (wallet) {
             fetchJobs();
         } else {

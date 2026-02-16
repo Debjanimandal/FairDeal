@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
+    "@react-three/fiber": "^8.17.10",
     "@stellar/freighter-api": "^6.0.1",
     "@stellar/stellar-sdk": "^14.4.3",
     "@walletconnect/web3wallet": "^1.10.0",
@@ -24,6 +25,7 @@
     "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "three": "^0.182.0",
     "web3": "^4.1.2"
   },
   "devDependencies": {
@@ -32,6 +34,7 @@
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.182.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.22",
     "typescript": "^5.9.3"
