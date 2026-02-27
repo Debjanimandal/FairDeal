@@ -792,7 +792,7 @@ export default function JobDetailPage() {
                 onClick={() => router.push(`/submit-work/${jobId}`)}
                 style={{
                   padding: '0.875rem 2rem',
-                  background: '#3B82F6',
+                  background: '#003366',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -804,8 +804,8 @@ export default function JobDetailPage() {
                   gap: '0.5rem',
                   transition: 'all 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#2563EB'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#3B82F6'}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#002244'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#003366'}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -871,14 +871,14 @@ export default function JobDetailPage() {
               <div style={{
                 width: '60px',
                 height: '60px',
-                background: '#D1FAE5',
+                background: '#E0F2FE',
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 1.5rem'
               }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003366" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
@@ -910,7 +910,7 @@ export default function JobDetailPage() {
                     alignItems: 'center',
                     gap: '0.5rem',
                     padding: '0.875rem 1.5rem',
-                    background: '#10B981',
+                    background: '#003366',
                     color: 'white',
                     borderRadius: '8px',
                     textDecoration: 'none',
@@ -918,8 +918,8 @@ export default function JobDetailPage() {
                     fontWeight: '600',
                     transition: 'all 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#059669'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#10B981'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#002244'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#003366'}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

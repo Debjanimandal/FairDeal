@@ -162,7 +162,7 @@ export default function CreateJobPage() {
         flex: '1 1 400px',
         background: '#FFFFFF',
         color: '#0F172A',
-        padding: '10rem 6rem 4rem 4rem',
+        padding: '6rem 6rem 2rem 4rem',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -178,7 +178,7 @@ export default function CreateJobPage() {
             borderRadius: '99px',
             background: '#F1F5F9',
             border: '1px solid #E2E8F0',
-            marginBottom: '2rem',
+            marginBottom: '1.5rem',
             fontSize: '0.85rem',
             color: '#0072FF',
             fontWeight: '600'
@@ -187,23 +187,20 @@ export default function CreateJobPage() {
           </div>
 
           <h1 style={{
-            fontSize: '3.5rem',
+            fontSize: '3rem',
             fontWeight: '800',
             lineHeight: 1.1,
-            marginBottom: '1rem',
+            marginBottom: '2rem',
             color: '#0F172A',
             letterSpacing: '-0.02em'
           }}>
             Create New<br />
             <span style={{ color: '#0072FF' }}>Smart Contract</span>
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#475569', marginBottom: '3rem', maxWidth: '480px' }}>
-            Set up an escrow contract for your freelancer. Funds are locked securely until work is approved.
-          </p>
 
-          <div style={{ background: '#F8FAFC', padding: '2rem', borderRadius: '24px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1.5rem' }}>How it works</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ background: '#F8FAFC', padding: '1.5rem', borderRadius: '24px', border: '1px solid #E2E8F0' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem' }}>How it works</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E0F2FE', color: '#0072FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>1</div>
                 <div>
@@ -238,7 +235,7 @@ export default function CreateJobPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '2rem 2rem 2rem 140px', // Add left padding to account for curve
+        padding: '1rem 1rem 1rem 140px', // Add left padding to account for curve
         minHeight: '100vh'
       }}>
         {/* Curve */}
@@ -264,22 +261,22 @@ export default function CreateJobPage() {
 
         <div className="glass-card animate-fade-in" style={{
           width: '100%',
-          maxWidth: '550px',
+          maxWidth: '500px',
           position: 'relative',
           zIndex: 10,
           background: 'rgba(255, 255, 255, 0.05)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '2.5rem',
+          padding: '1.5rem',
           marginLeft: 'auto',
           marginRight: 'auto'
         }}>
 
-          {error && <div className="message-alert alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
-          {success && <div className="message-alert alert-success" style={{ marginBottom: '1.5rem' }}>{success}</div>}
+          {error && <div className="message-alert alert-error" style={{ marginBottom: '1rem' }}>{error}</div>}
+          {success && <div className="message-alert alert-success" style={{ marginBottom: '1rem' }}>{success}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div className="form-group">
                 <label style={{ color: '#94A3B8' }}>Freelancer Wallet Address</label>
                 <input
@@ -310,7 +307,7 @@ export default function CreateJobPage() {
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
               <label style={{ color: '#94A3B8' }}>Deadline</label>
               <select
                 name="deadlineDays"
@@ -326,7 +323,7 @@ export default function CreateJobPage() {
               </select>
             </div>
 
-            <div className="form-group" style={{ marginBottom: '2rem' }}>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
               <label style={{ color: '#94A3B8' }}>Job Description</label>
               <textarea
                 name="description"
@@ -334,7 +331,7 @@ export default function CreateJobPage() {
                 value={formData.description}
                 onChange={handleChange}
                 required
-                style={{ height: '120px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                style={{ height: '80px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
               />
             </div>
 
