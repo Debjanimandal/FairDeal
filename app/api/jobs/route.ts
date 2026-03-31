@@ -5,6 +5,27 @@ import { saveJobsToIPFS } from '@/lib/ipfs-utils';
 // GET /api/jobs - List all jobs
 export async function GET() {
   try {
+    // Load jobs from IPFS if available
+    const ipfsCID = process.env.IPFS_DATABASE_CID;
+    
+    if (ipfsCID && jobStorage.size === 0) {
+      try {
+        console.log(`📥 Loading jobs from IPFS: ${ipfsCID}`);
+        const axios = await import('axios');
+        const response = await axios.default.get(`https://gateway.pinata.cloud/ipfs/${ipfsCID}`);
+        const data = response.data;
+        
+        if (data.jobs && Array.isArray(data.jobs)) {
+          data.jobs.forEach((job: any) => {
+            jobStorage.set(job.id, job);
+          });
+          console.log(`✅ Loaded ${data.jobs.length} jobs from IPFS`);
+        }
+      } catch (ipfsError: any) {
+        console.warn('⚠️ Could not load from IPFS:', ipfsError.message);
+      }
+    }
+    
     const jobs = Array.from(jobStorage.values());
     return NextResponse.json({
       success: true,
