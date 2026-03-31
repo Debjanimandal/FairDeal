@@ -60,6 +60,23 @@ All core functionalities have been tested and verified:
 - ✅ Payment release workflow
 - ✅ Fraud flag tracking system
 
+#### Test Screenshots
+
+<div align="center">
+
+**Screenshot 1: Test Output**  
+![Test Output Screenshot 1](./docs/screenshots/test-1.png)
+
+**Screenshot 2: Test Results**  
+![Test Output Screenshot 2](./docs/screenshots/test-2.png)
+
+**Screenshot 3: Integration Tests**  
+![Test Output Screenshot 3](./docs/screenshots/test-3.png)
+
+</div>
+
+> 📝 **Note**: Add your test screenshots showing 3+ tests passing in the `docs/screenshots/` folder with names: `test-1.png`, `test-2.png`, `test-3.png`
+
 ---
 
 ## 📖 What is FairDeal?
