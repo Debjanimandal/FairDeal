@@ -51,37 +51,14 @@ Deployed on **Vercel** with:
 
 ![Test Passing](https://img.shields.io/badge/tests-passing-brightgreen?style=for-the-badge)
 
-**Contract Tests**: All 8 core functions tested
-
-```bash
-✅ create_job - Locks funds in escrow
-✅ submit_work - Records IPFS CID on-chain  
-✅ approve_work - Releases funds to freelancer
-✅ cancel_deal - Refunds client without penalty
-✅ request_revision - Updates state, keeps funds locked
-✅ raise_fraud_flag - Increments fraud counter
-✅ get_job - Retrieves job details
-✅ emergency_release - Auto-release after deadline
-```
-
-**Integration Tests**: Full workflow verified
-
-```bash
-✅ End-to-end job creation → submission → approval
-✅ File encryption & IPFS upload
-✅ Watermarked preview generation
-✅ Smart contract transaction signing
-✅ Fraud flag tracking
-```
-
-<details>
-<summary><b>📸 View Test Screenshot</b></summary>
-
-![Test Results Screenshot](./docs/test-results.png)
-
-*Screenshot showing 8+ tests passing for smart contract functions and API endpoints*
-
-</details>
+All core functionalities have been tested and verified:
+- ✅ Smart contract deployment and interaction
+- ✅ Wallet integration with Freighter
+- ✅ Job creation and escrow locking
+- ✅ File encryption and IPFS upload
+- ✅ Watermarked preview generation
+- ✅ Payment release workflow
+- ✅ Fraud flag tracking system
 
 ---
 
