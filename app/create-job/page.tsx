@@ -174,7 +174,7 @@ export default function CreateJobPage() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '8px 16px',
+            padding: '4px 16px',
             borderRadius: '99px',
             background: '#F1F5F9',
             border: '1px solid #E2E8F0',

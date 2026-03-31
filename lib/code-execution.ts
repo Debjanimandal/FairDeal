@@ -1,16 +1,25 @@
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 /**
  * Code Execution Utilities
  */
 export class CodeExecutionManager {
   async executeCode(files: any[]) {
-    // Create a temporary directory
-    const tempDir = path.join(process.cwd(), "temp_execution", `job-${Date.now()}`);
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
+    // Use /tmp in production (Vercel), local temp_execution in development
+    const isProduction = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+    const baseDir = isProduction ? os.tmpdir() : path.join(process.cwd(), "temp_execution");
+    const tempDir = path.join(baseDir, `job-${Date.now()}`);
+    
+    try {
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+    } catch (err) {
+      console.error('Error creating temp directory:', err);
+      throw new Error('Could not create temporary execution directory');
     }
 
     try {
