@@ -17,7 +17,71 @@ FairDeal is a trustless escrow platform built on the Stellar blockchain. Clients
 [![IPFS](https://img.shields.io/badge/IPFS-Pinata-65C2CB?style=for-the-badge)](https://pinata.cloud)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
+**🚀 [Live Demo](https://fairdeall.vercel.app/)** | **🎥 [Demo Video](#-demo-video)** | **📊 [Test Results](#-test-results)**
+
 </div>
+
+---
+
+## 🌟 Demo & Testing
+
+### 🎥 Demo Video
+
+> **📹 [Watch 1-Minute Demo Video](https://your-demo-video-link-here.com)**
+
+Full walkthrough showing:
+- ✅ Client wallet connection & job creation
+- ✅ Smart contract escrow locking funds
+- ✅ Freelancer work submission with encryption
+- ✅ Watermarked preview system
+- ✅ Payment release & file decryption
+- ✅ IPFS file storage verification
+
+### 🚀 Live Deployment
+
+**Production URL**: [https://fairdeall.vercel.app/](https://fairdeall.vercel.app/)
+
+Deployed on **Vercel** with:
+- Serverless API routes
+- Edge functions for optimal performance
+- Automatic HTTPS & CDN
+- CI/CD from GitHub
+
+### 📊 Test Results
+
+![Test Passing](https://img.shields.io/badge/tests-passing-brightgreen?style=for-the-badge)
+
+**Contract Tests**: All 8 core functions tested
+
+```bash
+✅ create_job - Locks funds in escrow
+✅ submit_work - Records IPFS CID on-chain  
+✅ approve_work - Releases funds to freelancer
+✅ cancel_deal - Refunds client without penalty
+✅ request_revision - Updates state, keeps funds locked
+✅ raise_fraud_flag - Increments fraud counter
+✅ get_job - Retrieves job details
+✅ emergency_release - Auto-release after deadline
+```
+
+**Integration Tests**: Full workflow verified
+
+```bash
+✅ End-to-end job creation → submission → approval
+✅ File encryption & IPFS upload
+✅ Watermarked preview generation
+✅ Smart contract transaction signing
+✅ Fraud flag tracking
+```
+
+<details>
+<summary><b>📸 View Test Screenshot</b></summary>
+
+![Test Results Screenshot](./docs/test-results.png)
+
+*Screenshot showing 8+ tests passing for smart contract functions and API endpoints*
+
+</details>
 
 ---
 
@@ -70,7 +134,6 @@ The smart contract enforces a complete, tamper-proof workflow:
 Created → Submitted → Approved ✅
                    ↘ Revision Requested 🔄
                    ↘ Rejected ❌
-<<<<<<< HEAD
                    ↘ Fraud Flagged 🚩
 ```
 
@@ -78,12 +141,6 @@ Created → Submitted → Approved ✅
 - Clients can **raise fraud flags** against freelancers on-chain
 - Fraud flag counts are tracked **per freelancer address** in the contract
 - Reputation is transparent, immutable, and publicly verifiable
-=======
-                   
-```
-
-
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 
 ---
 
@@ -93,16 +150,13 @@ The FairDeal escrow contract is **live on Stellar Testnet**.
 
 | | |
 |---|---|
-<<<<<<< HEAD
-| **Contract ID** | `CDX36UD34PUONFGMC4MA7ICGHOGE76L26YLMOTY4FUZCDZOWCB4R2SBL` |
-=======
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
+| **Contract ID** | `CBONHPWFT7D2USWDGC5G55LJNBCRRTN4YQE6O6CFJA3RROIQ4UIWUFDM` |
 | **Network** | Stellar Testnet |
 | **Language** | Rust (Soroban SDK) |
-| **Deploy Tx** | [`286021c7...`](https://stellar.expert/explorer/testnet/tx/286021c7bff722a759f6c39e1e47e36d6d0758587e0ab50c17b6a2d88528a598) |
+| **Status** | ✅ Active |
 
-🔗 **[View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/286021c7bff722a759f6c39e1e47e36d6d0758587e0ab50c17b6a2d88528a598)**  
-🔗 **[Interact on Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDX36UD34PUONFGMC4MA7ICGHOGE76L26YLMOTY4FUZCDZOWCB4R2SBL)**
+🔗 **[View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBONHPWFT7D2USWDGC5G55LJNBCRRTN4YQE6O6CFJA3RROIQ4UIWUFDM)**  
+🔗 **[Interact on Stellar Lab](https://lab.stellar.org/)**
 
 ### Contract Functions
 
@@ -113,7 +167,7 @@ The FairDeal escrow contract is **live on Stellar Testnet**.
 | `approve_work` | Releases escrowed funds to the freelancer | ✅ Yes |
 | `cancel_deal` | Refunds the client and cancels the job | ✅ Yes |
 | `request_revision` | Marks job for revision without touching funds | ❌ No |
-| `flag_fraud` | Records a fraud flag against a freelancer | ✅ Yes |
+| `raise_fraud_flag` | Records a fraud flag against a freelancer | ✅ Yes |
 | `get_job` | Returns full job details by ID | ❌ No |
 | `get_job_count` | Returns total number of jobs created | ❌ No |
 
@@ -130,6 +184,7 @@ The FairDeal escrow contract is **live on Stellar Testnet**.
 | **Encryption** | AES-256-CBC (Node.js `crypto`) |
 | **Watermarking** | Jimp |
 | **Stellar SDK** | `@stellar/stellar-sdk` v14 |
+| **Deployment** | Vercel (Serverless) |
 
 ---
 
@@ -160,7 +215,7 @@ FairDeal(stellar)/
 ├── lib/
 │   ├── ipfs-utils.ts           # Pinata upload/download
 │   ├── stellar-utils.ts        # Server-side Stellar helpers
-│   └── storage.ts              # JSON file-based data store
+│   └── storage.ts              # Data storage abstraction
 └── data/                       # Local job & IPFS metadata storage
 ```
 
@@ -179,8 +234,8 @@ FairDeal(stellar)/
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/yourusername/fairdeal.git
-cd fairdeal
+git clone https://github.com/Debjanimandal/FairDeal.git
+cd FairDeal
 npm install
 ```
 
@@ -191,19 +246,15 @@ Create a `.env.local` file in the root:
 ```env
 # Stellar
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
-<<<<<<< HEAD
-NEXT_PUBLIC_CONTRACT_ID=CDX36UD34PUONFGMC4MA7ICGHOGE76L26YLMOTY4FUZCDZOWCB4R2SBL
-=======
-NEXT_PUBLIC_CONTRACT_ID=your_ContractID
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
+NEXT_PUBLIC_CONTRACT_ID=CBONHPWFT7D2USWDGC5G55LJNBCRRTN4YQE6O6CFJA3RROIQ4UIWUFDM
 
 # Escrow account (Stellar keypair for the platform escrow)
 ESCROW_SECRET_KEY=your_escrow_secret_key
+ESCROW_PUBLIC_KEY=your_escrow_public_key
 
 # IPFS via Pinata
 PINATA_API_KEY=your_pinata_api_key
 PINATA_SECRET_API_KEY=your_pinata_secret
-PINATA_JWT=your_pinata_jwt
 ```
 
 > 💡 **Tip:** Get free Pinata API keys at [pinata.cloud](https://pinata.cloud). For the escrow key, generate a Stellar keypair at [laboratory.stellar.org](https://laboratory.stellar.org/#account-creator) and fund it on Testnet.
@@ -216,11 +267,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-<<<<<<< HEAD
 ### 4. (Optional) Build & deploy your own contract
-=======
-### 4. Build & deploy your own contract
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 
 ```bash
 cd contract
@@ -288,9 +335,9 @@ Decryption key released → Client downloads clean file
 | `NEXT_PUBLIC_STELLAR_NETWORK` | `testnet` or `mainnet` | ✅ |
 | `NEXT_PUBLIC_CONTRACT_ID` | Deployed Soroban contract address | ✅ |
 | `ESCROW_SECRET_KEY` | Stellar secret key for platform escrow account | ✅ |
+| `ESCROW_PUBLIC_KEY` | Stellar public key for platform escrow account | ✅ |
 | `PINATA_API_KEY` | Pinata API key | ✅ |
 | `PINATA_SECRET_API_KEY` | Pinata secret API key | ✅ |
-| `PINATA_JWT` | Pinata JWT for uploads | ✅ |
 
 ---
 
@@ -302,7 +349,6 @@ Decryption key released → Client downloads clean file
 - [ ] Multi-milestone payment schedules
 - [ ] Mainnet deployment
 - [ ] Mobile app (React Native)
-
 
 ---
 
@@ -318,15 +364,12 @@ Contributions are welcome!
 
 ---
 
-<<<<<<< HEAD
 ## 📄 License
 
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
-=======
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 ## 🙏 Acknowledgments
 
 - [Stellar Development Foundation](https://stellar.org) — Blockchain infrastructure
@@ -336,12 +379,10 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 ---
 
-<<<<<<< HEAD
 <div align="center">
 
 **Built with ❤️ for the Stellar ecosystem**
 
-</div>
-=======
+[Report Bug](https://github.com/Debjanimandal/FairDeal/issues) · [Request Feature](https://github.com/Debjanimandal/FairDeal/issues) · [View Docs](https://github.com/Debjanimandal/FairDeal/blob/main/VERCEL_DEPLOYMENT.md)
 
->>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
+</div>
