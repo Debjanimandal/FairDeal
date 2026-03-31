@@ -70,6 +70,7 @@ The smart contract enforces a complete, tamper-proof workflow:
 Created → Submitted → Approved ✅
                    ↘ Revision Requested 🔄
                    ↘ Rejected ❌
+<<<<<<< HEAD
                    ↘ Fraud Flagged 🚩
 ```
 
@@ -77,6 +78,12 @@ Created → Submitted → Approved ✅
 - Clients can **raise fraud flags** against freelancers on-chain
 - Fraud flag counts are tracked **per freelancer address** in the contract
 - Reputation is transparent, immutable, and publicly verifiable
+=======
+                   
+```
+
+
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 
 ---
 
@@ -86,7 +93,10 @@ The FairDeal escrow contract is **live on Stellar Testnet**.
 
 | | |
 |---|---|
+<<<<<<< HEAD
 | **Contract ID** | `CDX36UD34PUONFGMC4MA7ICGHOGE76L26YLMOTY4FUZCDZOWCB4R2SBL` |
+=======
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 | **Network** | Stellar Testnet |
 | **Language** | Rust (Soroban SDK) |
 | **Deploy Tx** | [`286021c7...`](https://stellar.expert/explorer/testnet/tx/286021c7bff722a759f6c39e1e47e36d6d0758587e0ab50c17b6a2d88528a598) |
@@ -181,7 +191,11 @@ Create a `.env.local` file in the root:
 ```env
 # Stellar
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
+<<<<<<< HEAD
 NEXT_PUBLIC_CONTRACT_ID=CDX36UD34PUONFGMC4MA7ICGHOGE76L26YLMOTY4FUZCDZOWCB4R2SBL
+=======
+NEXT_PUBLIC_CONTRACT_ID=your_ContractID
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 
 # Escrow account (Stellar keypair for the platform escrow)
 ESCROW_SECRET_KEY=your_escrow_secret_key
@@ -202,7 +216,11 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+<<<<<<< HEAD
 ### 4. (Optional) Build & deploy your own contract
+=======
+### 4. Build & deploy your own contract
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 
 ```bash
 cd contract
@@ -285,6 +303,7 @@ Decryption key released → Client downloads clean file
 - [ ] Mainnet deployment
 - [ ] Mobile app (React Native)
 
+
 ---
 
 ## 🤝 Contributing
@@ -299,12 +318,15 @@ Contributions are welcome!
 
 ---
 
+<<<<<<< HEAD
 ## 📄 License
 
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
+=======
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
 ## 🙏 Acknowledgments
 
 - [Stellar Development Foundation](https://stellar.org) — Blockchain infrastructure
@@ -314,8 +336,12 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 ---
 
+<<<<<<< HEAD
 <div align="center">
 
 **Built with ❤️ for the Stellar ecosystem**
 
 </div>
+=======
+
+>>>>>>> 228ac312057bc106e6d81e78b5a0c7147e6bb256
